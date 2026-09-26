@@ -1,122 +1,141 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import { sampleContracts } from './data/sampleContracts';
+import type { LegalDocument } from './types/legal';
+import { Header } from './components/Header';
+import type { ActiveTab } from './components/Header';
+import { DocumentAuditor } from './components/DocumentAuditor';
+import { ContractComparator } from './components/ContractComparator';
+import { GroundedQA } from './components/GroundedQA';
+import { PrecedentNavigator } from './components/PrecedentNavigator';
+import { ActionChecklist } from './components/ActionChecklist';
+import { CounselBriefGenerator } from './components/CounselBriefGenerator';
+import { DocumentUploader } from './components/DocumentUploader';
+import { TermsModal } from './components/TermsModal';
+import { PrivacyModal } from './components/PrivacyModal';
+import { ScalesIcon } from './components/Icons';
 
-function App() {
-  const [count, setCount] = useState(0)
+export const App: React.FC = () => {
+  const [documents, setDocuments] = useState<LegalDocument[]>(sampleContracts);
+  const [activeDocId, setActiveDocId] = useState<string>(sampleContracts[0].id);
+  const [activeTab, setActiveTab] = useState<ActiveTab>('auditor');
+  const [isUploadOpen, setIsUploadOpen] = useState<boolean>(false);
+  const [isTermsOpen, setIsTermsOpen] = useState<boolean>(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState<boolean>(false);
+  const [qaPrefillQuery, setQaPrefillQuery] = useState<string>('');
+
+  const currentDoc = documents.find((d) => d.id === activeDocId) || documents[0];
+
+  const handleDocumentLoaded = (newDoc: LegalDocument) => {
+    setDocuments((prev) => [newDoc, ...prev]);
+    setActiveDocId(newDoc.id);
+    setActiveTab('auditor');
+  };
+
+  const handleSelectClauseForQA = (clauseNumber: string) => {
+    setQaPrefillQuery(`What does ${clauseNumber} obligate me to do, and what are my legal protections?`);
+    setActiveTab('qa');
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="juris-app">
+      {/* Masthead Header & Navigation */}
+      <Header
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onOpenUpload={() => setIsUploadOpen(true)}
+        onOpenTerms={() => setIsTermsOpen(true)}
+        onOpenPrivacy={() => setIsPrivacyOpen(true)}
+        activeDocTitle={currentDoc.title}
+      />
 
-      <div className="ticks"></div>
+      {/* Main Workspace Area */}
+      <main className="main-content-area">
+        {activeTab === 'auditor' && (
+          <DocumentAuditor
+            document={currentDoc}
+            onSelectClauseForQA={handleSelectClauseForQA}
+            onSwitchDocument={(id) => setActiveDocId(id)}
+            allDocuments={documents}
+          />
+        )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        {activeTab === 'comparator' && (
+          <ContractComparator />
+        )}
+
+        {activeTab === 'qa' && (
+          <GroundedQA
+            document={currentDoc}
+            initialQuery={qaPrefillQuery}
+            onNavigateToClause={() => setActiveTab('auditor')}
+          />
+        )}
+
+        {activeTab === 'precedents' && (
+          <PrecedentNavigator />
+        )}
+
+        {activeTab === 'checklist' && (
+          <ActionChecklist document={currentDoc} />
+        )}
+
+        {activeTab === 'counsel' && (
+          <CounselBriefGenerator document={currentDoc} />
+        )}
+      </main>
+
+      {/* Global Editorial Footer */}
+      <footer className="site-footer no-print">
+        <div className="footer-content">
+          <div className="footer-left">
+            <div className="footer-brand">
+              <ScalesIcon size={16} />
+              <span>JURISFOLIO LEGAL INTELLIGENCE</span>
+            </div>
+            <p className="footer-text">
+              Engineered to demystify complex legal drafting, balance asymmetrical contracts, and empower non-lawyers with statutory literacy before entering consultations with advocates.
+            </p>
+          </div>
+
+          <div className="footer-right">
+            <div className="footer-links-row">
+              <button type="button" onClick={() => setIsTermsOpen(true)} className="footer-link">
+                Terms of Service
+              </button>
+              <span className="footer-sep">•</span>
+              <button type="button" onClick={() => setIsPrivacyOpen(true)} className="footer-link">
+                Privacy Policy
+              </button>
+              <span className="footer-sep">•</span>
+              <button type="button" onClick={() => setActiveTab('precedents')} className="footer-link">
+                Judicial Precedent Index
+              </button>
+            </div>
+            <div className="footer-copy">
+              Grounded in Supreme Court & High Court Precedents, Transfer of Property Act, and Indian Contract Act, 1872.
+            </div>
+          </div>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      </footer>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
+      {/* Modals */}
+      <DocumentUploader
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+        onDocumentLoaded={handleDocumentLoaded}
+      />
 
-export default App
+      <TermsModal
+        isOpen={isTermsOpen}
+        onClose={() => setIsTermsOpen(false)}
+      />
+
+      <PrivacyModal
+        isOpen={isPrivacyOpen}
+        onClose={() => setIsPrivacyOpen(false)}
+      />
+    </div>
+  );
+};
+
+export default App;
