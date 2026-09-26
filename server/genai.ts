@@ -477,6 +477,10 @@ export async function handleGenAIRequest(request: Request, env: HandlerEnv, fetc
 
   if (isRateLimited(clientIdentifier(request.headers))) return json({ error: 'Too many AI requests. Please wait a minute.' }, 429);
 
+  // Reject oversized payloads from the declared length before buffering anything into memory.
+  const declaredLength = Number(request.headers.get('content-length') ?? '0');
+  if (declaredLength > LIMITS.maxBodyBytes) return json({ error: 'Request too large.' }, 413);
+
   const bodyText = await request.text();
   if (bodyText.length > LIMITS.maxBodyBytes) return json({ error: 'Request too large.' }, 413);
 

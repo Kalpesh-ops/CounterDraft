@@ -44,17 +44,25 @@ The former inline frame-busting script was removed so the CSP can use `script-sr
 - **Abuse & errors**: cross-site browser requests rejected (`Sec-Fetch-Site` / `Origin` check), per-client rate limit keyed on the platform-set client IP (20 requests/minute per instance, bounded memory), 45 s upstream timeout, generic error messages without upstream details, `Cache-Control: no-store`.
 
 ### 2.4 Cryptographic Headers & Content Security Policy
-Enforced as response headers in `vercel.json` (with a `<meta>` fallback in `index.html`):
+Enforced as response headers in `vercel.json` (with a `<meta>` fallback in `index.html`). No inline scripts or styles are permitted:
 ```http
-default-src 'self';
-script-src 'self' 'unsafe-inline';
-style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-font-src 'self' https://fonts.gstatic.com;
-connect-src 'self';
-img-src 'self' data: https:;
-object-src 'none';
-base-uri 'self';
+Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com;
+  font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none';
+  base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Cross-Origin-Opener-Policy: same-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()
 ```
+`/api/*` responses additionally send `Cache-Control: no-store`.
+
+### 2.4.1 Supply-Chain Security
+- **Zero known vulnerabilities**: `npm audit` reports 0 issues across production and development dependencies; the heavyweight `vercel` CLI was removed from devDependencies (use `npx vercel` when needed).
+- **CI gate**: every push runs `npm audit --audit-level=moderate` before lint, typecheck, coverage-gated tests, and build, with a least-privilege `permissions: contents: read` workflow token.
+- **Dependabot**: weekly grouped updates for npm packages and GitHub Actions (`.github/dependabot.yml`).
+- **Minimal runtime surface**: the only production dependencies are `react` and `react-dom`; Gemini is called with the platform `fetch`, not an SDK.
 
 ### 2.5 Resilient Clipboard Operations (`safeCopyToClipboard`)
 Direct invocation of `navigator.clipboard.writeText()` throws unhandled promise rejections in non-HTTPS origins or when browser permissions are denied.
@@ -64,5 +72,6 @@ Direct invocation of `navigator.clipboard.writeText()` throws unhandled promise 
 
 ### 2.6 Fault Isolation (`src/components/ErrorBoundary.tsx`)
 - Wraps root component tree in `main.tsx`.
+- Logs diagnostics to the console only in development builds, so production never echoes contract content into consoles or log collectors.
 - Intercepts unexpected rendering exceptions.
 - Provides a clean recovery view conforming to the warm paper aesthetic (`#f8f6f0`), with a button to reload the workspace safely.

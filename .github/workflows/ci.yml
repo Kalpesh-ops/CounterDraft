@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   validate-and-test:
     name: Lint, Test & Build Validation
@@ -28,11 +31,17 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Dependency Vulnerability Audit
+        run: npm audit --audit-level=moderate
+
       - name: Code Quality & Lint Check
         run: npm run lint
 
-      - name: Security & Unit Test Suite
-        run: npm test
+      - name: Strict TypeScript Typecheck (app, server, tooling)
+        run: npm run typecheck
+
+      - name: Test Suite with Coverage Thresholds
+        run: npm run test:coverage
 
       - name: TypeScript Typecheck & Production Bundle Build
         run: npm run build
