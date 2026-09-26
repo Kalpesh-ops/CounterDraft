@@ -32,7 +32,9 @@ export type GenAIRequest =
   | { task: 'qa'; title: string; question: string; clauses: ClauseInput[] }
   | { task: 'simplify'; language: SupportedLanguage; clause: ClauseInput };
 
-type Validation<T> = { ok: true; value: T } | { ok: false; error: string };
+export type Validation<T> =
+  | { ok: true; value: T; error?: undefined }
+  | { ok: false; error: string; value?: undefined };
 
 // ---------------------------------------------------------------------------
 // Input validation
