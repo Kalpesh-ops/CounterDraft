@@ -5,7 +5,7 @@
 [![CI/CD Pipeline](https://github.com/Kalpesh-ops/CounterDraft/actions/workflows/ci.yml/badge.svg)](https://github.com/Kalpesh-ops/CounterDraft/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![GenAI: Google Gemini](https://img.shields.io/badge/GenAI-Google_Gemini-1a73e8.svg)](#2-approach-grounded-genai)
-[![Tests Passing](https://img.shields.io/badge/Tests-63%20passing-brightgreen.svg)](#testing)
+[![Tests Passing](https://img.shields.io/badge/Tests-82%20passing-brightgreen.svg)](#testing)
 
 ---
 
@@ -169,7 +169,10 @@ cp .env.example .env.local   # then set GEMINI_API_KEY
 npm run dev
 
 # Run Vitest test suite
-npm test -- --run
+npm test
+
+# Run with enforced coverage thresholds
+npm run test:coverage
 
 # Compile production bundle
 npm run build
@@ -183,7 +186,7 @@ npm run build
 
 ### Testing
 
-`npm test` runs 63 Vitest tests covering the statutory engine, input sanitisation, the GenAI gateway (validation, prompt-injection fencing, quote and precedent verification, cross-site request blocking, HTTP handling, and rate limiting, with Gemini mocked), the GenAI client merge and fallback logic, accessible dialogs (focus trap, Escape, focus restore), the Gemini upload, Q&A and Explain Simply flows including failure fallbacks and opt-out, and UI navigation.
+`npm test` runs 82 Vitest tests (`npm run test:coverage` enforces thresholds; ~91% line coverage) covering the statutory engine, input sanitisation, the GenAI gateway (validation, prompt-injection fencing, quote and precedent verification, cross-site request blocking, HTTP handling, and rate limiting, with Gemini mocked), the GenAI client merge and fallback logic, accessible dialogs (focus trap, Escape, focus restore), the Gemini upload, Q&A and Explain Simply flows including failure fallbacks and opt-out, every workspace (auditor, comparator, checklist, counsel brief, negotiation email, precedents), file-upload guards, the error boundary, and UI navigation. CI also runs `npm audit`, Oxlint (with jsx-a11y rules), and a strict typecheck.
 
 ---
 

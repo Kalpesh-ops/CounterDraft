@@ -32,9 +32,26 @@ function genaiDevApi(env: Record<string, string>): Plugin {
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [react(), genaiDevApi(loadEnv(mode, process.cwd(), 'GEMINI_'))],
+  build: {
+    rollupOptions: {
+      output: {
+        // React changes far less often than app code, so it gets its own long-cached chunk.
+        manualChunks(id: string) {
+          if (id.includes('node_modules/react')) return 'react-vendor'
+        },
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,
     fileParallelism: false,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}', 'server/**/*.ts', 'api/**/*.ts'],
+      exclude: ['**/*.test.{ts,tsx}', 'src/main.tsx', 'src/data/**'],
+      reporter: ['text-summary', 'text', 'lcov'],
+      thresholds: { statements: 85, branches: 70, functions: 80, lines: 85 },
+    },
   },
 }))

@@ -21,6 +21,7 @@ cd CounterDraft
 npm install
 
 # Start local development server (Vite HMR)
+cp .env.example .env.local   # add GEMINI_API_KEY for GenAI features
 npm run dev
 ```
 
@@ -30,23 +31,25 @@ The application will be served at `http://localhost:5173/`.
 
 ## 2. Testing & Quality Assurance
 
-CounterDraft maintains comprehensive unit and integration test coverage using **Vitest**:
+CounterDraft uses **Vitest** with **Testing Library** (82 tests) and enforces coverage thresholds in CI (statements 85%, lines 85%, functions 80%, branches 70%; current: ~88% statements, ~91% lines):
 
 ```bash
-# Execute full test suite in single-run mode
-npm test -- --run
-
-# Run tests in continuous watch mode during development
-npm test
-
-# Run tests with coverage reporting
-npm test -- --coverage
+npm test                 # full suite, single run
+npm run test:coverage    # suite + v8 coverage report with enforced thresholds
+npm run typecheck        # strict TypeScript across app, server, and tooling
+npm run lint             # Oxlint: correctness, React hooks, jsx-a11y, TypeScript rules
+npm run audit:deps       # npm audit at moderate severity (also run in CI)
 ```
 
 ### Test Suite Structure
-- `src/utils/security.test.ts`: Validates XSS neutralization, payload caps, control character removal, ReDoS resilience, and clipboard fallbacks.
-- `src/services/legalEngine.test.ts`: Verifies statutory clause risk evaluation, contract parsing, grounded Q&A snippet extraction, and financial exposure calculations.
-- `src/components/App.test.tsx`: End-to-end integration tests verifying tab navigation, document switching, modal dialogs, and custom contract comparison workflows.
+- `src/utils/security.test.ts`: XSS neutralisation, payload caps, control-character removal, ReDoS resilience, clipboard fallbacks.
+- `src/services/legalEngine.test.ts`: statutory clause risk evaluation, contract parsing, grounded Q&A retrieval, financial exposure maths.
+- `src/services/genai.test.ts`: merging Gemini insights without altering verbatim clause text, gateway error handling for fallback.
+- `server/genai.test.ts`: request validation, prompt-injection fencing, verbatim-quote and precedent verification, cross-site blocking, trusted client IP, rate limiting, and HTTP status mapping (Gemini mocked).
+- `api/genai.test.ts`: the Vercel Function adapter and its configuration.
+- `src/components/GenAIFeatures.test.tsx`: accessible dialogs (focus trap, Escape, focus restore), Gemini upload/Q&A/Explain Simply flows, failure fallbacks, GenAI opt-out, response caching.
+- `src/components/Workspaces.test.tsx`: auditor filters and keyboard expansion, comparator custom diffs and errors, checklist progress/add/export, counsel brief copy/print, negotiation email, precedent search, file-upload guards, error boundary recovery.
+- `src/components/App.test.tsx`: end-to-end tab navigation and policy dialogs.
 
 ---
 
@@ -62,6 +65,12 @@ npm run preview
 # Execute fast linter (Oxlint)
 npm run lint
 ```
+
+### Performance Practices
+- **Code splitting**: six secondary workspaces and all three dialogs are `React.lazy` chunks; React ships in a separate long-cached `react-vendor` chunk (initial app chunk ~89 KB).
+- **Memoisation**: derived data (`useMemo`), stable handlers (`useCallback`), and `React.memo` on the header and provenance badge prevent needless re-renders.
+- **Network**: Gemini explanations are cached per clause and language; in-flight requests are aborted on unmount; only used font weights are loaded.
+- **Server**: precedent match keys are precomputed once; oversized bodies are rejected from `Content-Length` before buffering.
 
 ---
 

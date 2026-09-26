@@ -35,7 +35,7 @@ npm install
 npm run dev
 
 # 4. Run the test suite
-npm test -- --run
+npm test
 
 # 5. Verify the production build
 npm run build
@@ -74,16 +74,10 @@ When proposing or editing legal engine rules in `src/services/legalEngine.ts` or
 
 ## 5. Pull Request Guidelines
 
-1. Ensure all tests pass cleanly:
+1. Ensure the full quality gate passes (the same checks CI runs):
    ```bash
-   npm test -- --run
+   npm run audit:deps && npm run lint && npm run typecheck && npm run test:coverage && npm run build
    ```
-2. Verify production bundle build:
-   ```bash
-   npm run build
-   ```
-3. Run linter:
-   ```bash
-   npm run lint
-   ```
+2. Add or update tests for every behaviour change; coverage thresholds are enforced.
+3. Update the relevant document in `docs/` when changing architecture, security controls, or GenAI behaviour.
 4. Open a Pull Request referencing the related issue using our [Pull Request Template](.github/pull_request_template.md).

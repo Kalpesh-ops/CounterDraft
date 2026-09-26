@@ -158,4 +158,15 @@ legal-pw-f/
 CounterDraft utilizes localized, reactive React state (`useState`) without external Redux/Zustand overhead:
 - Active Docket (`activeDocId` & `currentDoc` in `App.tsx`) propagates unidirectionally down to child modules.
 - Dynamic custom comparisons (`pairsList` in `ContractComparator.tsx`) maintain immutability via prepend operators (`[newPair, ...prev]`).
-- Transient modal states (`isUploadOpen`, `isTermsOpen`, `isPrivacyOpen`) unmount cleanly when dismissed.
+- Transient modal states (`isUploadOpen`, `isTermsOpen`, `isPrivacyOpen`) mount lazily on first open and unmount cleanly when dismissed.
+- Per-document workspaces are keyed by `currentDoc.id`, so switching contracts resets Q&A history and checklist state instead of leaking it across documents.
+- Handlers passed to the memoised `Header` are wrapped in `useCallback`; derived collections use `useMemo`.
+
+## 5. GenAI Request Lifecycle
+
+1. The browser sends `{ task, ...payload }` to same-origin `POST /api/genai` (60 s client timeout, abortable).
+2. `server/genai.ts` rejects cross-site requests, applies the per-client rate limit, enforces JSON and size limits, and validates the payload against task-specific schemas.
+3. A task prompt is built with the curated precedent corpus in the system instruction and all user text fenced as untrusted data.
+4. Gemini `generateContent` is called in JSON mode (temperature 0.2, 45 s timeout).
+5. Output is normalised: clause numbers must exist in the request, enums are clamped, strings length-capped, quotes verified verbatim, precedents matched to the corpus.
+6. The browser merges the result over the rule-engine analysis (verbatim text untouched) and labels its provenance; any failure falls back to the rule engine.

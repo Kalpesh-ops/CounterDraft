@@ -21,7 +21,7 @@ Fixes #(issue)
 Please verify that your contribution meets all standards before submitting:
 
 - [ ] **TypeScript Strict Mode**: Code compiles cleanly with `tsc -b && vite build` (zero type errors).
-- [ ] **Tests Passing**: All unit and integration tests pass via `npm test -- --run`.
+- [ ] **Tests Passing**: All tests pass and coverage thresholds hold via `npm run test:coverage`; `npm run lint`, `npm run typecheck`, and `npm run audit:deps` are clean.
 - [ ] **New Tests Added**: Added appropriate test coverage in `src/utils/security.test.ts` or `src/services/legalEngine.test.ts`.
 - [ ] **Negative Design Constraints Checked**: Confirmed that **none** of the 30 prohibited design patterns are present (no emojis, no em dashes, `#f8f6f0` warm paper palette maintained, `box-shadow: none !important`, sharp corners, no Lucide icons).
 - [ ] **Privacy Invariant Preserved**: Confirmed zero outbound network telemetry, remote analytics, or server persistence is introduced.
