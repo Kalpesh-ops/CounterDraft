@@ -75,7 +75,7 @@ export function validateRequest(body: unknown): Validation<GenAIRequest> {
   switch (body.task) {
     case 'analyze': {
       const clauses = validateClauses(body.clauses);
-      if (!clauses.ok) return clauses;
+      if (!clauses.ok) return { ok: false, error: clauses.error };
       return {
         ok: true,
         value: {
@@ -90,7 +90,7 @@ export function validateRequest(body: unknown): Validation<GenAIRequest> {
       const question = cleanText(body.question, LIMITS.maxQuestionChars);
       if (question.length < 3) return { ok: false, error: 'Question is too short.' };
       const clauses = validateClauses(body.clauses);
-      if (!clauses.ok) return clauses;
+      if (!clauses.ok) return { ok: false, error: clauses.error };
       return {
         ok: true,
         value: { task: 'qa', title: cleanText(body.title, LIMITS.maxTitleChars) || 'Agreement', question, clauses: clauses.value },
@@ -100,7 +100,7 @@ export function validateRequest(body: unknown): Validation<GenAIRequest> {
       const language = SUPPORTED_LANGUAGES.find((l) => l === body.language);
       if (!language) return { ok: false, error: 'Unsupported language.' };
       const clauses = validateClauses([body.clause]);
-      if (!clauses.ok) return clauses;
+      if (!clauses.ok) return { ok: false, error: clauses.error };
       return { ok: true, value: { task: 'simplify', language, clause: clauses.value[0] } };
     }
     default:

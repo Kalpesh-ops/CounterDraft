@@ -6,6 +6,8 @@
  */
 import { handleGenAIRequest } from '../server/genai.js';
 
+declare const process: { env: Record<string, string | undefined> };
+
 export const config = { maxDuration: 60 };
 
 export function POST(request: Request): Promise<Response> {

@@ -1,4 +1,4 @@
-import type { CourtPrecedent } from '../types/legal';
+import type { CourtPrecedent } from '../types/legal.js';
 
 export const courtPrecedents: CourtPrecedent[] = [
   {

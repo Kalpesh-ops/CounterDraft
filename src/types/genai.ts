@@ -2,7 +2,7 @@
  * Shared request/response contract between the browser and the
  * CounterDraft GenAI gateway (`/api/genai`, backed by Google Gemini).
  */
-import type { ClauseAnalysis, ObligationItem, RiskLevel } from './legal';
+import type { ClauseAnalysis, ObligationItem, RiskLevel } from './legal.js';
 
 export const SUPPORTED_LANGUAGES = [
   'English', 'Hindi', 'Bengali', 'Marathi', 'Tamil', 'Telugu', 'Kannada', 'Gujarati',

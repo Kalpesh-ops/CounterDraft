@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { POST, config } from './genai';
+import { POST, config } from './genai.js';
 
 afterEach(() => {
   vi.unstubAllEnvs();
