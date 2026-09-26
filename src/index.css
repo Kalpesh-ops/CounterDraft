@@ -188,6 +188,8 @@ input:focus, select:focus, textarea:focus {
   letter-spacing: 1.5px;
   color: var(--ink-primary);
   line-height: 1;
+  margin: 0;
+  padding: 0;
 }
 
 .brand-subtitle {
@@ -2221,6 +2223,9 @@ input:focus, select:focus, textarea:focus {
   color: var(--ink-primary);
   text-decoration: underline;
   padding: 2px 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
 }
 
 .footer-link:hover {

@@ -1,0 +1,10 @@
+# CounterDraft Vulnerability Disclosure Policy (RFC 9116)
+# https://counterdraft.legal/.well-known/security.txt
+
+Contact: mailto:security@counterdraft.legal
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://counterdraft.legal/.well-known/security.txt
+Policy: https://counterdraft.legal/#privacy
+Acknowledgments: https://counterdraft.legal/#precedents
+Hiring: https://counterdraft.legal/

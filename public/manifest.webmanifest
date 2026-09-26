@@ -1,0 +1,21 @@
+{
+  "name": "CounterDraft | Legal Intelligence & Clause Negotiation Engine",
+  "short_name": "CounterDraft",
+  "description": "Demystify complex legal drafting, audit clause liabilities, compare contracts, and generate statutory redlines grounded in Indian law.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f6f0",
+  "theme_color": "#f8f6f0",
+  "orientation": "portrait-primary",
+  "categories": ["business", "legal", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "lang": "en-US",
+  "dir": "ltr"
+}

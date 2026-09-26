@@ -1,0 +1,51 @@
+# CounterDraft Legal Intelligence & Clause Negotiation Engine
+
+> CounterDraft is a privacy-first, client-side legal intelligence platform that demystifies complex contracts, audits asymmetric clause liabilities, performs side-by-side contract diffing, and generates statutory redlines and advocate briefs grounded in Indian statutory law and landmark Supreme Court precedents.
+
+## Overview
+
+CounterDraft addresses the systemic asymmetry between institutional contract drafters and prospective signatories (tenants, employees, consultants, and MSME vendors). The platform operates on a 100% local-first, zero-cloud-retention model where documents are parsed and evaluated entirely within the client's browser session.
+
+## Core Capabilities
+
+- [Clause Risk Auditor](https://counterdraft.legal/#auditor): Identifies high-risk provisions (unilateral termination, unliquidated damages, post-tenure non-competes, one-sided indemnities) and produces 1-click statutory redline counter-proposals.
+- [Side-by-Side Contract Comparator](https://counterdraft.legal/#comparator): Analyzes linguistic deviations between baseline drafts and counterparty markups, flagging favorability shifts and newly inserted liabilities.
+- [Negotiation Playbook](https://counterdraft.legal/#playbook): Calculates concrete financial exposure (deposit confiscation, lock-in salary exposure, compounding daily penalties) and compiles professional negotiation correspondence ready to transmit to landlords, employers, or corporate counterparties.
+- [Judicial Precedent Navigator](https://counterdraft.legal/#precedents): Comprehensive legal authority repository linking contract clauses directly to binding Supreme Court and High Court rulings.
+- [Grounded Document Q&A](https://counterdraft.legal/#qa): Answers natural language legal inquiries with verbatim anchored citations from the ingested contract combined with statutory override notes.
+- [Counsel Brief Generator](https://counterdraft.legal/#counsel): Generates an editorial 1-page printable legal memorandum organizing high-priority risks, statutory defenses, missing safeguards, and tailored interrogation questions for an advocate consultation.
+- [Actionable Safeguard Checklist](https://counterdraft.legal/#checklist): Structured milestone checklist organizing pre-signing verifications, active tenure record-keeping, and exit notices with plain-text compliance export.
+
+## Statutory Foundations
+
+CounterDraft evaluates contractual enforceability against statutory benchmarks under Indian law:
+
+- **Section 27, Indian Contract Act, 1872**: Every agreement by which anyone is restrained from exercising a lawful profession, trade, or business of any kind, is to that extent void. Post-termination non-competes are void ab initio.
+- **Section 74, Indian Contract Act, 1872**: Liquidated damages and penalties. Stipulations for forfeit or penalty can only compensate actual proven loss; unilateral total forfeitures without injury are unenforceable penalties.
+- **Section 73, Indian Contract Act, 1872**: Compensation for loss or damage caused by breach of contract is limited to direct, natural consequences.
+- **Section 23, Indian Contract Act, 1872**: Agreements contrary to public policy or unconscionable standard-form bargains between parties with unequal bargaining power are voidable.
+- **Section 108, Transfer of Property Act, 1882**: Rights and liabilities of lessor and lessee, including statutory quiet enjoyment and structural repair responsibilities.
+- **Arbitration and Conciliation Act, 1996**: Non-arbitrability of landlord-tenant eviction disputes governed by specialized rent control acts.
+
+## Landmark Supreme Court Precedents
+
+- **Percept D'Mark (India) v. Zaheer Khan (2006) 4 SCC 227**: Freedom of trade under Section 27; post-departure non-compete covenants are completely unenforceable in India.
+- **Kailash Nath Associates v. DDA (2015) 4 SCC 136**: Forfeiture of earnest money or security deposits is subject to Section 74; proof of actual financial damage is condition precedent.
+- **Central Inland Water Transport Corp v. Brojo Nath Ganguly (1986) 3 SCC 156**: Doctrine of unconscionability; unilateral termination clauses imposed on employees without cause violate Article 14 and Section 23.
+- **Niranjan Shankar Golikari v. Century Spinning & Mfg Co. (1967) 2 SCR 378**: Distinguishes valid non-compete covenants operating during active employment from invalid post-tenure restraints.
+- **LIC of India v. Consumer Education & Research Centre (1995) 5 SCC 482**: Unfair and one-sided terms in adhesion contracts are contrary to public policy.
+- **Vidya Drolia v. Durga Trading Corp (2021) 2 SCC 1**: Jurisdiction and non-arbitrability benchmarks in landlord-tenant disputes.
+
+## Privacy & Security Architecture
+
+- **Zero Server Retention**: No contract text, user queries, or briefs are ever transmitted to or stored on external servers or databases.
+- **No Third-Party Telemetry**: Zero external tracking, analytics scripts, or cookies.
+- **Input Sanitization**: Multi-layer sanitization neutralizes HTML markup, script vectors, and prototype pollution keys.
+- **Content Security Policy**: Strict CSP with default-src 'self', frame-ancestors 'none', and no external script execution.
+
+## System Details
+
+- **Type**: Single Page Web Application (SPA)
+- **Technology**: React 19, TypeScript, Vite
+- **Repository / Source**: https://github.com/kalpeshparashar/counterdraft
+- **Documentation**: https://counterdraft.legal/llms-full.txt

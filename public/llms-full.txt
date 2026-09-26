@@ -1,0 +1,109 @@
+# CounterDraft Legal Intelligence & Clause Negotiation Engine - Full Context & Prompt Grounding
+
+## 1. System Mission & Identity
+
+CounterDraft is an autonomous legal intelligence system built to assist individuals, tenants, employees, independent contractors, and MSMEs in reviewing, comprehending, and counter-proposing legal agreements. It bridges the accessibility gap in legal information by translating opaque legalese into structured risk analysis, statutory protections, and actionable counter-drafts before formal advocate engagement.
+
+## 2. Structural Modules & Functionality
+
+### 2.1 Clause Risk Auditor (`#auditor`)
+Evaluates each contractual provision into one of four risk levels:
+- **High Risk**: Unilateral power, blanket forfeiture, post-tenure commercial restraints, unlimited indemnity, or severe liability asymmetries.
+- **Caution**: Ambiguous notice windows, one-sided repair responsibilities, low liability caps, or strict compliance deadlines.
+- **Standard**: Mutual operational provisions, reasonable notice periods (30+ days), reciprocal covenants.
+- **Favorable**: Clear bilateral cure periods, capped damages, escrow protection on deposits, mutual audit rights.
+
+Output includes:
+1. Clause Number & Title
+2. Verbatim Original Language
+3. Plain-Terms Translation
+4. Risk Level & Rationale
+5. Statutory Context & Citation
+6. Practical Real-World Scenario
+7. Ready-to-Send Balanced Redline Counter-Proposal
+
+### 2.2 Contract Comparator (`#comparator`)
+Compares two contract versions (e.g., standard baseline vs. counterparty markups).
+- Diffs text line by line and clause by clause.
+- Flags whether modifications represent an increased exposure ("worse for user"), neutral alteration, or beneficial amendment ("better for user").
+- Computes Net Favorability Shift across the agreement.
+- Supports side-by-side analysis of preloaded commercial agreements and custom user drafts.
+
+### 2.3 Negotiation Playbook (`#playbook`)
+- Computes quantifiable financial exposure:
+  - Security deposit vulnerable to unilateral confiscation.
+  - Compounding daily late fees and interest liabilities.
+  - Accelerated rent or wage forfeitures over mandatory lock-in periods.
+  - Liability caps limiting vendor accountability.
+- Compiles an editorial counter-draft negotiation letter addressed to landlords, hiring directors, or vendors proposing reciprocal terms and statutory remedies.
+
+### 2.4 Grounded Document Q&A (`#qa`)
+- Provides document-anchored inquiry retrieval.
+- Matches user questions with relevant clause snippets.
+- Augments document text with statutory rights and judicial override notes (e.g., explaining why a non-compete clause in the contract cannot be enforced in an Indian court regardless of signature).
+
+### 2.5 Judicial Precedent Navigator (`#precedents`)
+- Curated repository of landmark Supreme Court and High Court judgments.
+- Contains case citations, benches, core statutory principles, practical contract applications, and direct cross-references to flagged contract clauses.
+
+### 2.6 Counsel Brief Generator (`#counsel`)
+- Formats a 1-page structured memorandum for an initial consultation with an advocate.
+- Highlights high-priority risks, statutory defenses, missing safeguards (cure periods, force majeure, reciprocal indemnities), and specific strategic questions to put to legal counsel.
+- Includes a dedicated print stylesheet for clean physical printing or PDF generation.
+
+### 2.7 Actionable Safeguard Checklist (`#checklist`)
+- Divides contract execution into three operational phases:
+  - Pre-Signing: Verification of title, submission of redlines, escrow clarification.
+  - Active Term: Written defect notifications, payment receipts log, notice calendar.
+  - Termination & Exit: Formal exit notice, joint inspection protocol, deposit return receipt.
+- Exports formatted `.txt` compliance records with timestamps.
+
+## 3. Statutory Codification Reference
+
+### Indian Contract Act, 1872
+- **Section 10**: What agreements are contracts (free consent, competent parties, lawful consideration).
+- **Section 23**: What considerations and objects are lawful (unlawful if opposed to public policy or defeating legal provisions).
+- **Section 27**: Agreement in restraint of trade, void. "Every agreement by which any one is restrained from exercising a lawful profession, trade or business of any kind, is to that extent void."
+- **Section 28**: Agreements in restraint of legal proceedings, void (cannot extinguish legal remedy before statutory limitation).
+- **Section 73**: Compensation for loss or damage caused by breach of contract (direct, natural, foreseeable damages).
+- **Section 74**: Compensation for breach of contract where penalty stipulated for (stipulations for forfeit require actual damage; unreasonable forfeitures constitute illegal penalties).
+- **Sections 124 & 125**: Contract of indemnity defined; rights of indemnity-holder when sued.
+
+### Transfer of Property Act, 1882
+- **Section 108(c)**: Right of quiet enjoyment of leased premises without interruption.
+- **Section 108(f)**: Lessee's right to make necessary repairs neglected by lessor and deduct expense from rent.
+- **Section 108(m)**: Obligation to keep property in good condition, reasonable wear and tear excepted.
+- **Section 111**: Determination of lease by lapse of time, notice, or mutual surrender.
+
+## 4. Landmark Judicial Authorities
+
+1. **Percept D'Mark (India) Pvt. Ltd. v. Zaheer Khan (2006) 4 SCC 227**
+   - *Court*: Supreme Court of India
+   - *Core Ruling*: Section 27 applies without exception to all post-employment restraints. Negative covenants cannot survive the expiry or termination of the contract.
+
+2. **Kailash Nath Associates v. Delhi Development Authority (2015) 4 SCC 136**
+   - *Court*: Supreme Court of India
+   - *Core Ruling*: Forfeiture of earnest money or security deposits is legally governed by Section 74. If the plaintiff suffered no financial damage, no forfeiture can be permitted.
+
+3. **Central Inland Water Transport Corporation Ltd. v. Brojo Nath Ganguly (1986) 3 SCC 156**
+   - *Court*: Supreme Court of India
+   - *Core Ruling*: The court will not enforce unconscionable, unfair, or unreasonable clauses in standard-form contracts entered into by parties with grossly unequal bargaining power.
+
+4. **Niranjan Shankar Golikari v. Century Spinning & Mfg. Co. Ltd. (1967) 2 SCR 378**
+   - *Court*: Supreme Court of India
+   - *Core Ruling*: A negative covenant operating exclusively during the active term of employment does not violate Section 27 unless shown to be unconscionable or one-sided.
+
+5. **LIC of India v. Consumer Education & Research Centre (1995) 5 SCC 482**
+   - *Court*: Supreme Court of India
+   - *Core Ruling*: Standard adhesion contracts drafted unilaterally by dominant institutions must adhere to principles of reasonableness, fairness, and public interest.
+
+6. **Vidya Drolia v. Durga Trading Corporation (2021) 2 SCC 1**
+   - *Court*: Supreme Court of India
+   - *Core Ruling*: Clarified arbitrability of landlord-tenant disputes; matters governed by specialized state rent control legislation remain non-arbitrable before civil courts.
+
+## 5. Architectural Security Profile
+
+- **Engine Location**: 100% Client-Side execution.
+- **Data Retention**: Zero external server transmissions.
+- **Cryptographic Headers**: Strict Content Security Policy (CSP), X-Frame-Options: DENY, X-Content-Type-Options: nosniff, Referrer-Policy: strict-origin-when-cross-origin.
+- **Sanitization Protocol**: Multi-stage linear input sanitization neutralizing DOM XSS, prototype pollution, and malicious file types.

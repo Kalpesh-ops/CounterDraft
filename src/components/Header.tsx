@@ -46,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
             <ScalesIcon size={24} />
           </div>
           <div>
-            <div className="brand-title">COUNTERDRAFT</div>
+            <h1 className="brand-title">COUNTERDRAFT</h1>
             <div className="brand-subtitle">
               Legal Intelligence, Clause Risk Auditor & Counter-Proposal Engine
             </div>

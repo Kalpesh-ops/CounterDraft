@@ -115,6 +115,14 @@ export const App: React.FC = () => {
               <button type="button" onClick={() => setActiveTab('precedents')} className="footer-link">
                 Judicial Precedent Index
               </button>
+              <span className="footer-sep">•</span>
+              <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="footer-link">
+                Sitemap
+              </a>
+              <span className="footer-sep">•</span>
+              <a href="/llms.txt" target="_blank" rel="noopener noreferrer" className="footer-link">
+                LLMs.txt
+              </a>
             </div>
             <div className="footer-copy">
               Grounded in Supreme Court & High Court Precedents, Transfer of Property Act, and Indian Contract Act, 1872.

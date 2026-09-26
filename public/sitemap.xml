@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  <!-- Homepage & Clause Risk Auditor -->
+  <url>
+    <loc>https://counterdraft.legal/</loc>
+    <lastmod>2026-09-26T21:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Contract Comparator -->
+  <url>
+    <loc>https://counterdraft.legal/#comparator</loc>
+    <lastmod>2026-09-26T21:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Negotiation Playbook & Financial Exposure -->
+  <url>
+    <loc>https://counterdraft.legal/#playbook</loc>
+    <lastmod>2026-09-26T21:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Grounded Document Q&A -->
+  <url>
+    <loc>https://counterdraft.legal/#qa</loc>
+    <lastmod>2026-09-26T21:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Judicial Precedent Navigator & Case Law Index -->
+  <url>
+    <loc>https://counterdraft.legal/#precedents</loc>
+    <lastmod>2026-09-26T21:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Compliance & Safeguard Action Checklist -->
+  <url>
+    <loc>https://counterdraft.legal/#checklist</loc>
+    <lastmod>2026-09-26T21:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Legal Counsel Consultation Brief Memorandum -->
+  <url>
+    <loc>https://counterdraft.legal/#counsel</loc>
+    <lastmod>2026-09-26T21:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- LLM Context & Specification Index -->
+  <url>
+    <loc>https://counterdraft.legal/llms.txt</loc>
+    <lastmod>2026-09-26T21:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- LLM Full Grounding Context Reference -->
+  <url>
+    <loc>https://counterdraft.legal/llms-full.txt</loc>
+    <lastmod>2026-09-26T21:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>
