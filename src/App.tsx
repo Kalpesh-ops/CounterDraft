@@ -7,6 +7,7 @@ import { DocumentAuditor } from './components/DocumentAuditor';
 import { ContractComparator } from './components/ContractComparator';
 import { GroundedQA } from './components/GroundedQA';
 import { PrecedentNavigator } from './components/PrecedentNavigator';
+import { NegotiationPlaybook } from './components/NegotiationPlaybook';
 import { ActionChecklist } from './components/ActionChecklist';
 import { CounselBriefGenerator } from './components/CounselBriefGenerator';
 import { DocumentUploader } from './components/DocumentUploader';
@@ -63,6 +64,10 @@ export const App: React.FC = () => {
           <ContractComparator />
         )}
 
+        {activeTab === 'playbook' && (
+          <NegotiationPlaybook document={currentDoc} />
+        )}
+
         {activeTab === 'qa' && (
           <GroundedQA
             document={currentDoc}
@@ -90,10 +95,10 @@ export const App: React.FC = () => {
           <div className="footer-left">
             <div className="footer-brand">
               <ScalesIcon size={16} />
-              <span>JURISFOLIO LEGAL INTELLIGENCE</span>
+              <span>COUNTERDRAFT LEGAL INTELLIGENCE</span>
             </div>
             <p className="footer-text">
-              Engineered to demystify complex legal drafting, balance asymmetrical contracts, and empower non-lawyers with statutory literacy before entering consultations with advocates.
+              Engineered to demystify complex legal drafting, balance asymmetrical contracts, and empower non-lawyers with actionable redline counter-drafts and statutory literacy before entering consultations with advocates.
             </p>
           </div>
 

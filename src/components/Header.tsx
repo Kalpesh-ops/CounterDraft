@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScalesIcon, DocumentIcon, CompareIcon, SearchIcon, GavelIcon, ChecklistIcon, BriefcaseIcon, PlusIcon } from './Icons';
 
-export type ActiveTab = 'auditor' | 'comparator' | 'qa' | 'precedents' | 'checklist' | 'counsel';
+export type ActiveTab = 'auditor' | 'comparator' | 'qa' | 'precedents' | 'playbook' | 'checklist' | 'counsel';
 
 interface HeaderProps {
   activeTab: ActiveTab;
@@ -26,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="disclaimer-banner">
         <span className="disclaimer-tag">STATUTORY NOTICE</span>
         <span className="disclaimer-text">
-          Informational assistance only. JurisFolio does not provide formal legal advice or create an attorney-client relationship. All evaluations must be validated by an enrolled advocate or jurisdictional legal professional.
+          Informational assistance only. CounterDraft does not provide formal legal representation or create an attorney-client relationship. All evaluations must be validated by an enrolled advocate or jurisdictional legal professional.
         </span>
         <div className="policy-links">
           <button type="button" onClick={onOpenTerms} className="policy-link-btn">
@@ -46,9 +46,9 @@ export const Header: React.FC<HeaderProps> = ({
             <ScalesIcon size={24} />
           </div>
           <div>
-            <div className="brand-title">JURISFOLIO</div>
+            <div className="brand-title">COUNTERDRAFT</div>
             <div className="brand-subtitle">
-              Accessible Legal Document Intelligence & Case Law Navigator
+              Legal Intelligence, Clause Risk Auditor & Counter-Proposal Engine
             </div>
           </div>
         </div>
@@ -88,6 +88,15 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <CompareIcon size={15} />
           <span>Contract Comparator & Redline</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('playbook')}
+          className={`tab-btn ${activeTab === 'playbook' ? 'active' : ''}`}
+        >
+          <BriefcaseIcon size={15} />
+          <span>Negotiation Email & Exposure</span>
         </button>
 
         <button

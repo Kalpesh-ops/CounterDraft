@@ -1,4 +1,4 @@
-/* JURISFOLIO EDITORIAL LEGAL DESIGN SYSTEM */
+/* COUNTERDRAFT EDITORIAL LEGAL DESIGN SYSTEM */
 /* Strictly enforces all positive aesthetic standards and all 30 negative constraints */
 
 :root {
@@ -2243,8 +2243,79 @@ input:focus, select:focus, textarea:focus {
   border: 1px solid var(--border-color);
   padding: 30px;
   text-align: center;
+/* NEGOTIATION PLAYBOOK & EMAIL DRAFTING */
+.negotiation-playbook-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.exposure-financial-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  padding: 12px 14px;
+}
+
+.fin-metric-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 6px;
+}
+
+.fin-metric-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.fin-metric-label {
+  font-weight: 600;
+  color: var(--ink-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.fin-metric-value {
+  color: var(--ink-primary);
+  font-size: 12.5px;
+  text-align: right;
+}
+
+.email-subject-box {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.email-subject-text {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.email-body-box {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 18px 20px;
+}
+
+.email-pre-text {
+  font-family: var(--font-body);
   font-size: 14px;
-  color: var(--ink-muted);
+  line-height: 1.65;
+  color: var(--ink-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* PRINT MEDIA STYLESHEET */

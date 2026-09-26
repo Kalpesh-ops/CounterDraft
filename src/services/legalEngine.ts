@@ -395,3 +395,179 @@ export function generateCounselBrief(doc: LegalDocument, clientName: string = 'C
     missingSafeguards
   };
 }
+
+export function generateNegotiationEmail(
+  doc: LegalDocument,
+  senderName: string = 'Prospective Signatory',
+  recipientName: string = 'Counterparty'
+): import('../types/legal').NegotiationEmail {
+  const highRisks = doc.clauses.filter(c => c.riskLevel === 'high');
+  const targetRisks = highRisks.length > 0 ? highRisks.slice(0, 3) : doc.clauses.slice(0, 2);
+
+  let recipientType: import('../types/legal').NegotiationEmail['recipientType'] = 'counterparty';
+  const docLower = doc.documentType.toLowerCase();
+  if (docLower.includes('lease') || docLower.includes('tenancy')) {
+    recipientType = 'landlord';
+  } else if (docLower.includes('employment')) {
+    recipientType = 'employer';
+  } else if (docLower.includes('saas') || docLower.includes('service') || docLower.includes('vendor')) {
+    recipientType = 'vendor';
+  }
+
+  const subject = 'Proposed Amendments and Clarifications: ' + doc.title;
+
+  let body = 'Dear ' + recipientName + ',\n\n';
+  body += 'Thank you for sharing the draft of ' + doc.title + '. I have reviewed the terms in detail and appreciate the comprehensive framework provided.\n\n';
+  body += 'In order to ensure mutual alignment, operational clarity, and standard commercial reciprocity, I would like to propose a few targeted revisions to specific provisions before execution:\n\n';
+
+  targetRisks.forEach((clause, idx) => {
+    body += (idx + 1) + '. ' + clause.clauseNumber + ' (' + clause.title + ')\n';
+    body += '   - Current Concern: ' + clause.plainSummary + '\n';
+    body += '   - Proposed Redline: "' + clause.recommendedCounterProposal + '"\n';
+    body += '   - Justification: ' + clause.riskRationale + '\n\n';
+  });
+
+  body += 'These adjustments reflect standard statutory standards under ' + doc.governingLaw + ' and ensure equitable protections for both parties.\n\n';
+  body += 'Please let me know if these proposed revisions work for you, or if we can schedule a brief call to finalize the draft.\n\n';
+  body += 'Sincerely,\n' + senderName;
+
+  return {
+    recipientType,
+    subject,
+    bodyText: body,
+    addressedClauseNumbers: targetRisks.map(c => c.clauseNumber)
+  };
+}
+
+export function calculateFinancialExposure(doc: LegalDocument): import('../types/legal').FinancialExposureSummary {
+  let depositAtRisk = 'Standard terms (no excessive deposit detected)';
+  let potentialPenaltyRate = 'Standard interest rate';
+  let noticeWageExposure = 'Standard mutual notice period';
+  let liabilityCapAmount = 'Uncapped or mutual statutory limits';
+  const keyFinancialVulnerabilities: string[] = [];
+
+  for (const c of doc.clauses) {
+    const text = c.originalText.toLowerCase();
+
+    if (text.includes('security deposit') || text.includes('deposit') || text.includes('forfeit')) {
+      if (text.includes('three (3) months') || text.includes('3 months')) {
+        depositAtRisk = '3 Months Rent (Subject to absolute forfeiture on early departure)';
+        keyFinancialVulnerabilities.push('Full 3-month security deposit vulnerable to unilateral forfeiture under ' + c.clauseNumber);
+      } else if (text.includes('two (2) months') || text.includes('2 months')) {
+        depositAtRisk = '2 Months Rent (Refundable with verified damage audit)';
+      }
+    }
+
+    if (text.includes('late fee') || text.includes('per day') || text.includes('500')) {
+      if (text.includes('500')) {
+        potentialPenaltyRate = '500 currency units per day of delay (Compounding daily penalty)';
+        keyFinancialVulnerabilities.push('Daily compounding penalty of 500 per day under ' + c.clauseNumber);
+      }
+    }
+
+    if (text.includes('ninety (90) days') || text.includes('90 days') || text.includes('lock-in')) {
+      if (text.includes('lock-in')) {
+        noticeWageExposure = '6 Months Lock-in rent liability (accelerated payment upon early vacancy)';
+        keyFinancialVulnerabilities.push('Accelerated rent obligation for full remaining lock-in period under ' + c.clauseNumber);
+      } else if (text.includes('without paying salary')) {
+        noticeWageExposure = '90 Days salary forfeiture on unilateral company restructuring';
+        keyFinancialVulnerabilities.push('Zero severance / salary in lieu of notice for employee under ' + c.clauseNumber);
+      }
+    }
+
+    if (text.includes('one (1) month') && (text.includes('liability') || text.includes('cap'))) {
+      liabilityCapAmount = 'Restricted to 1 month of subscription fees (Maximum recovery)';
+      keyFinancialVulnerabilities.push('Vendor liability capped at 1 month of fees under ' + c.clauseNumber + ' despite potential data breach');
+    }
+  }
+
+  if (keyFinancialVulnerabilities.length === 0) {
+    keyFinancialVulnerabilities.push('No extreme financial penalty or forfeiture provisions detected in parsed clauses.');
+  }
+
+  return {
+    depositAtRisk,
+    potentialPenaltyRate,
+    noticeWageExposure,
+    liabilityCapAmount,
+    keyFinancialVulnerabilities
+  };
+}
+
+export function compareCustomDocuments(docA: LegalDocument, docB: LegalDocument): import('../types/legal').ComparisonPair {
+  const diffs: import('../types/legal').ComparisonDiff[] = [];
+
+  const maxLen = Math.max(docA.clauses.length, docB.clauses.length);
+
+  for (let i = 0; i < maxLen; i++) {
+    const clauseA = docA.clauses[i];
+    const clauseB = docB.clauses[i];
+
+    if (clauseA && clauseB) {
+      const isIdentical = clauseA.originalText.trim() === clauseB.originalText.trim();
+      const riskHigher = (clauseB.riskLevel === 'high' && clauseA.riskLevel !== 'high') ||
+                         (clauseB.riskLevel === 'caution' && clauseA.riskLevel === 'standard');
+
+      let riskImpact: import('../types/legal').ComparisonDiff['riskImpact'] = 'neutral';
+      if (!isIdentical && riskHigher) {
+        riskImpact = 'worse_for_user';
+      } else if (!isIdentical && clauseB.riskLevel === 'favorable') {
+        riskImpact = 'better_for_user';
+      }
+
+      diffs.push({
+        clauseNumber: clauseB.clauseNumber || clauseA.clauseNumber,
+        topic: clauseB.title || clauseA.title,
+        versionAText: clauseA.originalText,
+        versionBText: clauseB.originalText,
+        status: isIdentical ? 'identical' : 'modified',
+        riskImpact,
+        analysis: isIdentical
+          ? 'Language is identical between both versions.'
+          : 'Version B alters obligations in ' + clauseB.title + '. ' + clauseB.riskRationale,
+        keyWordChanges: [
+          'Version A Risk: ' + clauseA.riskLevel.toUpperCase(),
+          'Version B Risk: ' + clauseB.riskLevel.toUpperCase()
+        ]
+      });
+    } else if (clauseB && !clauseA) {
+      diffs.push({
+        clauseNumber: clauseB.clauseNumber,
+        topic: clauseB.title + ' (Added Provision)',
+        versionAText: '[Not present in Document A]',
+        versionBText: clauseB.originalText,
+        status: 'added',
+        riskImpact: clauseB.riskLevel === 'high' ? 'worse_for_user' : 'neutral',
+        analysis: 'Provision added in Document B that did not exist in Document A: ' + clauseB.plainSummary,
+        keyWordChanges: ['New clause introduced in Document B']
+      });
+    } else if (clauseA && !clauseB) {
+      diffs.push({
+        clauseNumber: clauseA.clauseNumber,
+        topic: clauseA.title + ' (Deleted Provision)',
+        versionAText: clauseA.originalText,
+        versionBText: '[Deleted in Document B]',
+        status: 'removed',
+        riskImpact: clauseA.riskLevel === 'favorable' ? 'worse_for_user' : 'neutral',
+        analysis: 'Provision present in Document A was removed in Document B.',
+        keyWordChanges: ['Clause deleted in Document B']
+      });
+    }
+  }
+
+  const worseCount = diffs.filter(d => d.riskImpact === 'worse_for_user').length;
+  let netFavorabilityShift: import('../types/legal').ComparisonPair['netFavorabilityShift'] = 'balanced';
+  if (worseCount >= 3) netFavorabilityShift = 'substantially_worse';
+  else if (worseCount >= 1) netFavorabilityShift = 'moderately_worse';
+
+  return {
+    id: 'custom-comparison-' + Date.now(),
+    title: docA.title + ' vs. ' + docB.title,
+    description: 'Dynamic clause-by-clause comparison between ' + docA.title + ' and ' + docB.title + '.',
+    docA,
+    docB,
+    diffs,
+    netFavorabilityShift,
+    shiftSummary: 'Dynamic diff detected ' + diffs.length + ' provisions. ' + worseCount + ' clauses introduce increased exposure or liability shift for the signatory in Document B compared to Document A.'
+  };
+}

@@ -112,7 +112,7 @@ This Agreement shall be governed by the laws of India. Any legal dispute shall b
         {/* Modal Content */}
         <form onSubmit={handleSubmit} className="modal-body">
           <p className="modal-intro">
-            JurisFolio parses contract text locally in your browser. No confidential document text is stored on external model training databases.
+            CounterDraft parses contract text locally in your browser. No confidential document text is stored on external model training databases.
           </p>
 
           <div className="form-row-grid">

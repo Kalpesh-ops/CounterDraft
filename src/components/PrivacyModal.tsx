@@ -24,13 +24,13 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({ isOpen, onClose }) =
 
         <div className="modal-body policy-text-body">
           <div className="policy-statutory-callout">
-            <strong>CLIENT CONFIDENTIALITY COMMITMENT:</strong> Legal documents contain privileged business secrets, lease details, and personal identifiers. JurisFolio is engineered on a local-first paradigm designed to prevent confidential document retention.
+            <strong>CLIENT CONFIDENTIALITY COMMITMENT:</strong> Legal documents contain privileged business secrets, lease details, and personal identifiers. CounterDraft is engineered on a local-first paradigm designed to prevent confidential document retention.
           </div>
 
           <section className="policy-section">
             <h3>1. Local Memory Processing</h3>
             <p>
-              When you paste or upload contracts, agreements, or addenda into JurisFolio, parsing and clause analysis occur within your browser execution environment. Documents are retained in active session memory only for the duration of your inspection and are cleared when the session terminates.
+              When you paste or upload contracts, agreements, or addenda into CounterDraft, parsing and clause analysis occur within your browser execution environment. Documents are retained in active session memory only for the duration of your inspection and are cleared when the session terminates.
             </p>
           </section>
 
@@ -44,7 +44,7 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({ isOpen, onClose }) =
           <section className="policy-section">
             <h3>3. Zero Permanent Cloud Storage</h3>
             <p>
-              JurisFolio does not operate a persistent database storing your analyzed agreements. Any exports you generate (e.g. Counsel Briefs, Checklists) are compiled directly on your client device and downloaded to your local file system.
+              CounterDraft does not operate a persistent database storing your analyzed agreements. Any exports you generate (e.g. Counsel Briefs, Checklists) are compiled directly on your client device and downloaded to your local file system.
             </p>
           </section>
 

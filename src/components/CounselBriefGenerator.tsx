@@ -211,7 +211,7 @@ export const CounselBriefGenerator: React.FC<CounselBriefGeneratorProps> = ({ do
         <footer className="folio-footer-disclaimer">
           <ShieldAlertIcon size={16} />
           <p>
-            CONFIDENTIAL ATTORNEY-CLIENT PREPARATION AID: This briefing sheet was synthesized by JurisFolio solely to assist the user in preparing for formal consultation with a licensed legal practitioner. It does not constitute formal legal counsel.
+            CONFIDENTIAL ATTORNEY-CLIENT PREPARATION AID: This briefing sheet was synthesized by CounterDraft solely to assist the user in preparing for formal consultation with a licensed legal practitioner. It does not constitute formal legal counsel.
           </p>
         </footer>
       </article>

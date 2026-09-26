@@ -122,3 +122,19 @@ export interface CounselBrief {
   negotiationChecklist: string[];
   missingSafeguards: string[];
 }
+
+export interface NegotiationEmail {
+  recipientType: 'counterparty' | 'landlord' | 'employer' | 'vendor';
+  subject: string;
+  bodyText: string;
+  addressedClauseNumbers: string[];
+}
+
+export interface FinancialExposureSummary {
+  depositAtRisk: string;
+  potentialPenaltyRate: string;
+  noticeWageExposure: string;
+  liabilityCapAmount: string;
+  keyFinancialVulnerabilities: string[];
+}
+
