@@ -1,6 +1,18 @@
 import type { LegalDocument, ClauseAnalysis, RiskLevel, ObligationItem, GroundedQAResponse, CounselBrief } from '../types/legal';
 import { courtPrecedents } from '../data/courtPrecedents';
 
+/**
+ * Evaluates legal risk, statutory context, and judicial enforceability of a single clause.
+ * 
+ * Analyzes contractual provisions using linear keyword matching (O(N) ReDoS-safe)
+ * against statutory benchmarks from the Indian Contract Act, 1872 and Transfer of
+ * Property Act, 1882, accompanied by landmark Supreme Court precedent citations.
+ * 
+ * @param text - The raw or sanitized text of the clause.
+ * @param title - The title or section heading of the clause.
+ * @returns Comprehensive analysis object including risk rating, plain-terms summary,
+ * statutory context, and recommended counter-proposal redline.
+ */
 export function analyzeClauseRisk(text: string, title: string): {
   riskLevel: RiskLevel;
   riskRationale: string;
@@ -160,6 +172,18 @@ export function analyzeClauseRisk(text: string, title: string): {
   };
 }
 
+/**
+ * Parses raw legal contract text into a fully indexed LegalDocument object.
+ * 
+ * Segmenting algorithm uses bounded regular expressions and paragraph chunking
+ * to isolate distinct clauses, assigns statutory risk ratings, generates obligations,
+ * and computes the composite overall risk metric (0-100).
+ * 
+ * @param rawText - Sanitized contract text payload.
+ * @param customTitle - Optional user-defined title for the contract.
+ * @param customType - Optional contractual classification (e.g. "Residential Lease").
+ * @returns Fully populated LegalDocument ready for auditing, Q&A, and diffing.
+ */
 export function parseCustomContract(rawText: string, customTitle?: string, customType?: string): LegalDocument {
   const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
   const title = customTitle || (lines.length > 0 ? lines[0].slice(0, 80) : 'Custom Legal Document');
@@ -293,6 +317,16 @@ export function parseCustomContract(rawText: string, customTitle?: string, custo
   };
 }
 
+/**
+ * Executes grounded document inquiry retrieval against an ingested LegalDocument.
+ * 
+ * Extracts salient query tokens, locates matching contractual snippets, and augments
+ * verbatim language with mandatory statutory overrides and Supreme Court case precedents.
+ * 
+ * @param doc - The active LegalDocument being interrogated.
+ * @param question - Sanitized user question text.
+ * @returns GroundedQAResponse containing verbatim citations, statutory guidance, and follow-ups.
+ */
 export function queryDocumentGrounded(doc: LegalDocument, question: string): GroundedQAResponse {
   const qLower = question.toLowerCase();
   const matchedClauses: ClauseAnalysis[] = [];
@@ -356,6 +390,16 @@ export function queryDocumentGrounded(doc: LegalDocument, question: string): Gro
   };
 }
 
+/**
+ * Compiles a structured 1-page advocate consultation briefing memorandum.
+ * 
+ * Organizes high-priority statutory risks, identified legal defenses, missing protective
+ * covenants, and tailored questions for an enrolled legal practitioner.
+ * 
+ * @param doc - The audited LegalDocument.
+ * @param clientName - Client or prospective signatory identifier.
+ * @returns Fully populated CounselBrief ready for print stylesheet or copy.
+ */
 export function generateCounselBrief(doc: LegalDocument, clientName: string = 'Consulting Client'): CounselBrief {
   const highRisks = doc.clauses.filter(c => c.riskLevel === 'high');
   const cautionRisks = doc.clauses.filter(c => c.riskLevel === 'caution');
@@ -410,6 +454,17 @@ export function generateCounselBrief(doc: LegalDocument, clientName: string = 'C
   };
 }
 
+/**
+ * Generates ready-to-transmit professional negotiation correspondence.
+ * 
+ * Formats a respectful, legally grounded counter-draft email proposing specific
+ * redlines for the top identified risk clauses.
+ * 
+ * @param doc - The audited LegalDocument.
+ * @param senderName - Prospective signatory name.
+ * @param recipientName - Counterparty representative name.
+ * @returns NegotiationEmail object with subject and formatted body.
+ */
 export function generateNegotiationEmail(
   doc: LegalDocument,
   senderName: string = 'Prospective Signatory',
@@ -453,6 +508,15 @@ export function generateNegotiationEmail(
   };
 }
 
+/**
+ * Calculates concrete financial exposure metrics across contractual provisions.
+ * 
+ * Extracts monetary liabilities, unliquidated deposit forfeiture exposure,
+ * compounding daily delay penalties, and asymmetric liability limitations.
+ * 
+ * @param doc - The audited LegalDocument.
+ * @returns FinancialExposureSummary with itemized exposure ratings.
+ */
 export function calculateFinancialExposure(doc: LegalDocument): import('../types/legal').FinancialExposureSummary {
   let depositAtRisk = 'Standard terms (no excessive deposit detected)';
   let potentialPenaltyRate = 'Standard interest rate';
@@ -508,6 +572,16 @@ export function calculateFinancialExposure(doc: LegalDocument): import('../types
   };
 }
 
+/**
+ * Performs clause-by-clause comparative diffing between two contract versions.
+ * 
+ * Analyzes modifications, additions, and removals to quantify net favorability shift
+ * and highlight subtle liability transfers introduced in counterparty markups.
+ * 
+ * @param docA - Baseline or standard agreement version.
+ * @param docB - Revised or counterparty draft version.
+ * @returns ComparisonPair containing itemized diffs and aggregate favorability shift.
+ */
 export function compareCustomDocuments(docA: LegalDocument, docB: LegalDocument): import('../types/legal').ComparisonPair {
   const diffs: import('../types/legal').ComparisonDiff[] = [];
 

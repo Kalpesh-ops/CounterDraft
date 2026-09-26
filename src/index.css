@@ -6,15 +6,15 @@
   --bg-surface: #f1ede3;
   --bg-surface-alt: #e9e4d6;
   --bg-card: #fdfcf9;
-  
+
   --ink-primary: #1c1b18;
   --ink-secondary: #4a473f;
   --ink-muted: #736e63;
-  
+
   --border-color: #d6d1c4;
   --border-dark: #1c1b18;
   --border-subtle: #e6e2d8;
-  
+
   /* Semantic risk colors: refined editorial ink tones */
   --risk-high: #70251f;
   --risk-high-bg: #f9eceb;
@@ -24,14 +24,14 @@
   --risk-standard-bg: #f1f4f8;
   --risk-favorable: #22422e;
   --risk-favorable-bg: #edf5f0;
-  
+
   --counsel-navy: #15263a;
   --counsel-navy-light: #203650;
-  
+
   --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
   --font-body: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
   --font-mono: 'IBM Plex Mono', 'Courier Prime', monospace;
-  
+
   /* Zero drop shadows */
   box-shadow: none !important;
 }
@@ -40,10 +40,12 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  border-radius: 0px; /* Sharp editorial legal folio borders */
+  border-radius: 0px;
+  /* Sharp editorial legal folio borders */
 }
 
-html, body {
+html,
+body {
   background-color: var(--bg-page);
   color: var(--ink-primary);
   font-family: var(--font-body);
@@ -54,7 +56,12 @@ html, body {
 }
 
 /* Base typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-serif);
   font-weight: 500;
   color: var(--ink-primary);
@@ -74,7 +81,9 @@ button {
   transform: none !important;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   font-family: var(--font-body);
   border-radius: 0px;
   color: var(--ink-primary);
@@ -83,7 +92,9 @@ input, select, textarea {
   outline: none;
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
   border-color: var(--border-dark);
 }
 
@@ -735,7 +746,8 @@ input:focus, select:focus, textarea:focus {
   gap: 10px;
 }
 
-.rationale-text, .scenario-text {
+.rationale-text,
+.scenario-text {
   font-size: 13.5px;
   line-height: 1.55;
   color: var(--ink-secondary);
@@ -1120,7 +1132,8 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
-.qa-col-left, .qa-col-right {
+.qa-col-left,
+.qa-col-right {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -2329,6 +2342,7 @@ input:focus, select:focus, textarea:focus {
 
 /* PRINT MEDIA STYLESHEET */
 @media print {
+
   .site-header,
   .site-footer,
   .no-print,
@@ -2338,7 +2352,10 @@ input:focus, select:focus, textarea:focus {
     display: none !important;
   }
 
-  body, html, .juris-app, .main-content-area {
+  body,
+  html,
+  .juris-app,
+  .main-content-area {
     background-color: var(--bg-card) !important;
     color: var(--ink-primary) !important;
     padding: 0 !important;
