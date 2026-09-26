@@ -15,8 +15,10 @@
 - **Chosen Challenge Vertical**: Legal Information & Basic Legal Assistance Accessibility
 - **Repository Visibility**: Public GitHub Repository
 - **Repository Branch Count**: Exactly 1 branch (`main`)
-- **Repository Size**: ~345 KiB (Strictly compliant with `< 10 MB` ceiling)
-- **Deployment**: Static SPA deployable to GitHub Pages / Cloudflare Pages / Vercel
+- **Repository Size**: ~395 KiB (Strictly compliant with `< 10 MB` ceiling)
+- **Live Application**: [https://counterdraft-app.vercel.app](https://counterdraft-app.vercel.app/)
+- **Mirror Domain**: [https://counterdraft-legal.vercel.app](https://counterdraft-legal.vercel.app/)
+- **Deployment Platform**: Vercel (Edge-cached, zero-cloud retention client-side architecture)
 
 ---
 
