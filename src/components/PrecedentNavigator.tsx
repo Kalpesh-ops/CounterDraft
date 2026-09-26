@@ -136,7 +136,7 @@ export const PrecedentNavigator: React.FC = () => {
               </div>
             </div>
 
-            {/* Metadata Bar */}
+            {/* Metadata Bar (2x2 Balanced Grid) */}
             <div className="dossier-meta-table">
               <div className="meta-cell">
                 <span className="cell-label">BENCH COMPOSITION:</span>
@@ -149,6 +149,10 @@ export const PrecedentNavigator: React.FC = () => {
               <div className="meta-cell">
                 <span className="cell-label">CORE DOCTRINE:</span>
                 <span className="cell-value">{activePrecedent.coreDoctrine}</span>
+              </div>
+              <div className="meta-cell">
+                <span className="cell-label">COURT OF RECORD:</span>
+                <span className="cell-value">{activePrecedent.court} ({activePrecedent.year})</span>
               </div>
             </div>
 

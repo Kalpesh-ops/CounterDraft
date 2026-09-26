@@ -556,13 +556,13 @@ input:focus, select:focus, textarea:focus {
 
 .btn-filter-high.active {
   background-color: var(--risk-high);
-  color: #fff;
+  color: var(--bg-page);
   border-color: var(--risk-high);
 }
 
 .btn-filter-caution.active {
   background-color: var(--risk-caution);
-  color: #fff;
+  color: var(--bg-page);
   border-color: var(--risk-caution);
 }
 
@@ -1008,7 +1008,7 @@ input:focus, select:focus, textarea:focus {
   gap: 8px;
   padding: 8px 16px;
   background-color: var(--counsel-navy);
-  color: #fff;
+  color: var(--bg-page);
   border: 1px solid var(--counsel-navy);
   font-size: 13px;
   font-weight: 500;
@@ -1345,8 +1345,8 @@ input:focus, select:focus, textarea:focus {
 }
 
 .precedent-card-item.selected {
-  background-color: var(--bg-surface);
-  border-left: 4px solid var(--counsel-navy);
+  background-color: var(--bg-surface-alt);
+  border: 1px solid var(--border-dark);
 }
 
 .card-top-line {
@@ -1452,7 +1452,7 @@ input:focus, select:focus, textarea:focus {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   padding: 12px;
 }
@@ -2259,8 +2259,8 @@ input:focus, select:focus, textarea:focus {
   }
 
   body, html, .juris-app, .main-content-area {
-    background-color: #fff !important;
-    color: #000 !important;
+    background-color: var(--bg-card) !important;
+    color: var(--ink-primary) !important;
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
