@@ -1,0 +1,44 @@
+name: Statutory Rule or Precedent Proposal
+description: Propose a new Indian statutory rule or landmark Supreme Court/High Court precedent
+title: "[Legal Precedent]: "
+labels: ["legal-research", "statutory-rules"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        CounterDraft is grounded in verifiable Indian appellate jurisprudence and statutory codifications. Use this template to suggest landmark rulings or statutory sections for inclusion in the reasoning engine.
+  - type: input
+    id: case-name
+    attributes:
+      label: Case Name & Citation
+      placeholder: "e.g. Fateh Chand v. Balkishan Dass (1964) 1 SCR 515"
+    validations:
+      required: true
+  - type: input
+    id: court-bench
+    attributes:
+      label: Court, Year, & Bench
+      placeholder: "e.g. Supreme Court of India, 1963, 5-Judge Constitution Bench"
+    validations:
+      required: true
+  - type: input
+    id: statutory-section
+    attributes:
+      label: Governing Statutory Section
+      placeholder: "e.g. Section 74, Indian Contract Act, 1872"
+    validations:
+      required: true
+  - type: textarea
+    id: core-doctrine
+    attributes:
+      label: Core Legal Doctrine / Ratio Decidendi
+      description: Summarize the primary legal holding of the case in 2-3 sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: practical-redline
+    attributes:
+      label: Recommended Contractual Redline / Counter-Draft
+      description: How should contracts be amended to align with this ruling?
+    validations:
+      required: true

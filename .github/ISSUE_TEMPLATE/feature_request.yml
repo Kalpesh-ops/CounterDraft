@@ -1,0 +1,39 @@
+name: Feature Request
+description: Propose a new capability, export format, or legal workflow enhancement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggesting an enhancement for CounterDraft? We welcome ideas that improve legal accessibility, signatory negotiation power, and contract comprehension.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What specific legal review problem or workflow limitation does this feature address?
+      placeholder: "e.g. When reviewing consultancy agreements, users often need to track payment milestones against intellectual property assignment dates."
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution / User Experience
+      description: Describe how the feature should behave and how users will interact with it.
+      placeholder: "Add an IP transfer timeline view to the Action Checklist module..."
+    validations:
+      required: true
+  - type: textarea
+    id: legal-context
+    attributes:
+      label: Statutory or Legal Context (if applicable)
+      description: Any relevant Indian contract statutes or High Court/Supreme Court benchmarks supporting this workflow.
+    validations:
+      required: false
+  - type: checkboxes
+    id: design-constraints
+    attributes:
+      label: Design Standard Acknowledgment
+      options:
+        - label: I acknowledge that all features must strictly conform to CounterDraft's 30 negative design constraints (no emojis, warm paper aesthetic, zero drop shadows, no Lucide, sharp borders).
+          required: true

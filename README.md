@@ -160,6 +160,14 @@ CounterDraft guarantees absolute document confidentiality:
 - **Zero Web Storage**: `localStorage` and `sessionStorage` are untouched to prevent script scraping.
 - **Strict Content Security Policy**: Network egress is restricted via `connect-src 'self'`.
 
+## Community Standards & Repository Governance
+
+CounterDraft adheres to open source best practices and GitHub Community Standards:
+- **[Code of Conduct](CODE_OF_CONDUCT.md)**: Community standards and pledge based on Contributor Covenant v2.1.
+- **[Contributing Guidelines](CONTRIBUTING.md)**: Guidelines for bug reports, statutory rule proposals, PR checklists, and engineering invariants.
+- **[Security Policy](SECURITY.md)**: Supported versions, responsible vulnerability disclosure protocols, and response SLAs.
+- **[MIT License](LICENSE)**: Permissive open source license for community adoption and transparency.
+
 ---
 
 ## Statutory Disclaimer
