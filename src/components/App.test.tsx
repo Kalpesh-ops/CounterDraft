@@ -60,22 +60,22 @@ describe('CounterDraft Application - UI & Navigation Flow', () => {
     expect(screen.getByText(/RELEVANT STATUTORY DEFENSES/i)).toBeDefined();
   });
 
-  it('opens and closes Terms of Service modal', () => {
+  it('opens and closes Terms of Service modal', async () => {
     const termsButtons = screen.getAllByText('Terms of Service');
     fireEvent.click(termsButtons[0]);
 
-    expect(screen.getByText('TERMS OF SERVICE AND LEGAL NOTICE')).toBeDefined();
+    expect(await screen.findByText('TERMS OF SERVICE AND LEGAL NOTICE')).toBeDefined();
     const closeBtn = screen.getByText('I Understand and Acknowledge');
     fireEvent.click(closeBtn);
 
     expect(screen.queryByText('TERMS OF SERVICE AND LEGAL NOTICE')).toBeNull();
   });
 
-  it('opens and closes Privacy Policy modal', () => {
+  it('opens and closes Privacy Policy modal', async () => {
     const privacyButtons = screen.getAllByText('Privacy Policy');
     fireEvent.click(privacyButtons[0]);
 
-    expect(screen.getByText('PRIVACY POLICY AND DATA PROTECTION FRAMEWORK')).toBeDefined();
+    expect(await screen.findByText('PRIVACY POLICY AND DATA PROTECTION FRAMEWORK')).toBeDefined();
     const closeBtn = screen.getByText('Close Privacy Policy');
     fireEvent.click(closeBtn);
 

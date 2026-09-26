@@ -4,9 +4,6 @@ import type { LegalDocument } from './types/legal';
 import { Header } from './components/Header';
 import type { ActiveTab } from './components/Header';
 import { DocumentAuditor } from './components/DocumentAuditor';
-import { DocumentUploader } from './components/DocumentUploader';
-import { TermsModal } from './components/TermsModal';
-import { PrivacyModal } from './components/PrivacyModal';
 import { ScalesIcon } from './components/Icons';
 
 // Secondary workspaces are code-split so the initial bundle only ships the auditor.
@@ -15,6 +12,10 @@ const GroundedQA = lazy(() => import('./components/GroundedQA').then((m) => ({ d
 const PrecedentNavigator = lazy(() => import('./components/PrecedentNavigator').then((m) => ({ default: m.PrecedentNavigator })));
 const NegotiationPlaybook = lazy(() => import('./components/NegotiationPlaybook').then((m) => ({ default: m.NegotiationPlaybook })));
 const ActionChecklist = lazy(() => import('./components/ActionChecklist').then((m) => ({ default: m.ActionChecklist })));
+// Dialogs load on first open, not with the initial page.
+const DocumentUploader = lazy(() => import('./components/DocumentUploader').then((m) => ({ default: m.DocumentUploader })));
+const TermsModal = lazy(() => import('./components/TermsModal').then((m) => ({ default: m.TermsModal })));
+const PrivacyModal = lazy(() => import('./components/PrivacyModal').then((m) => ({ default: m.PrivacyModal })));
 const CounselBriefGenerator = lazy(() => import('./components/CounselBriefGenerator').then((m) => ({ default: m.CounselBriefGenerator })));
 
 export const App: React.FC = () => {
@@ -137,22 +138,18 @@ export const App: React.FC = () => {
         </div>
       </footer>
 
-      {/* Modals */}
-      <DocumentUploader
-        isOpen={isUploadOpen}
-        onClose={() => setIsUploadOpen(false)}
-        onDocumentLoaded={handleDocumentLoaded}
-      />
-
-      <TermsModal
-        isOpen={isTermsOpen}
-        onClose={() => setIsTermsOpen(false)}
-      />
-
-      <PrivacyModal
-        isOpen={isPrivacyOpen}
-        onClose={() => setIsPrivacyOpen(false)}
-      />
+      {/* Modals (mounted only once opened, so their code is fetched on demand) */}
+      <Suspense fallback={null}>
+        {isUploadOpen && (
+          <DocumentUploader
+            isOpen={isUploadOpen}
+            onClose={() => setIsUploadOpen(false)}
+            onDocumentLoaded={handleDocumentLoaded}
+          />
+        )}
+        {isTermsOpen && <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />}
+        {isPrivacyOpen && <PrivacyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />}
+      </Suspense>
     </div>
   );
 };

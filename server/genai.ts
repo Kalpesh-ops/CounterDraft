@@ -213,20 +213,28 @@ function respondentTokens(party: string): string[] {
   return acronym.length >= 3 ? [...significant, acronym] : significant;
 }
 
+/** Match keys for the curated corpus, computed once at module load rather than per lookup. */
+const PRECEDENT_KEYS = courtPrecedents.map((p) => {
+  const [first, second = ''] = normalizeForMatch(p.caseName).split(PARTY_SPLIT);
+  return {
+    petitionerKey: words(first).slice(0, 2).join(' '),
+    respondentTokens: respondentTokens(second),
+    label: `${p.caseName}, ${p.citation}`,
+  };
+});
+
 /** Returns the curated precedent matching a model-supplied reference, or undefined if it is not in the corpus. */
 export function matchPrecedent(ref: unknown): string | undefined {
   const needle = normalizeForMatch(str(ref, 300));
   if (needle.length < 4) return undefined;
   const [needleFirst, needleSecond] = needle.split(PARTY_SPLIT);
 
-  const hit = courtPrecedents.find((p) => {
-    const [first, second = ''] = normalizeForMatch(p.caseName).split(PARTY_SPLIT);
-    const petitionerKey = words(first).slice(0, 2).join(' ');
-    if (!needleFirst.includes(petitionerKey)) return false;
+  const hit = PRECEDENT_KEYS.find((key) => {
+    if (!needleFirst.includes(key.petitionerKey)) return false;
     // When the reference names a respondent, it must agree with the corpus entry.
-    return !needleSecond || respondentTokens(second).some((t) => needleSecond.includes(t));
+    return !needleSecond || key.respondentTokens.some((t) => needleSecond.includes(t));
   });
-  return hit ? `${hit.caseName}, ${hit.citation}` : undefined;
+  return hit?.label;
 }
 
 export function normalizeAnalyze(raw: unknown, req: Extract<GenAIRequest, { task: 'analyze' }>): AnalyzeResult {
@@ -282,7 +290,7 @@ export function normalizeAnalyze(raw: unknown, req: Extract<GenAIRequest, { task
 
 export function normalizeQA(raw: unknown, req: Extract<GenAIRequest, { task: 'qa' }>): QAResult {
   const r = isRecord(raw) ? raw : {};
-  const byNumber = new Map(req.clauses.map((c) => [c.clauseNumber, c]));
+  const byNumber = new Map(req.clauses.map((c) => [c.clauseNumber, { ...c, normalized: normalizeForMatch(c.text) }]));
   const proposed = (Array.isArray(r.citations) ? r.citations : []).filter(isRecord).slice(0, 5);
 
   const citations: QAResult['citations'] = [];
@@ -290,7 +298,7 @@ export function normalizeQA(raw: unknown, req: Extract<GenAIRequest, { task: 'qa
     const clause = byNumber.get(str(c.clauseNumber, 40));
     const snippet = str(c.exactSnippet, 600);
     // Grounding check: the quote must appear verbatim (modulo whitespace/quote style) in the cited clause.
-    if (!clause || snippet.length < 8 || !normalizeForMatch(clause.text).includes(normalizeForMatch(snippet))) continue;
+    if (!clause || snippet.length < 8 || !clause.normalized.includes(normalizeForMatch(snippet))) continue;
     citations.push({
       clauseNumber: clause.clauseNumber,
       clauseTitle: clause.title,
@@ -400,18 +408,52 @@ export async function runTask(req: GenAIRequest, opts: GeminiOptions): Promise<A
 
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX = 20;
+const RATE_MAX_TRACKED = 5_000;
 const rateBuckets = new Map<string, { count: number; resetAt: number }>();
 
-/** Best-effort per-instance sliding limiter; serverless instances do not share memory. */
+/** Drops expired buckets so memory stays bounded without resetting active clients' limits. */
+function pruneRateBuckets(now: number): void {
+  for (const [key, bucket] of rateBuckets) {
+    if (bucket.resetAt <= now) rateBuckets.delete(key);
+  }
+}
+
+/** Best-effort per-instance fixed-window limiter; serverless instances do not share memory. */
 export function isRateLimited(key: string, now = Date.now()): boolean {
   const bucket = rateBuckets.get(key);
   if (!bucket || bucket.resetAt <= now) {
-    if (rateBuckets.size > 5_000) rateBuckets.clear();
+    if (rateBuckets.size >= RATE_MAX_TRACKED) pruneRateBuckets(now);
+    if (rateBuckets.size >= RATE_MAX_TRACKED) return true; // Fail closed under a flood of distinct clients.
     rateBuckets.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS });
     return false;
   }
   bucket.count += 1;
   return bucket.count > RATE_MAX;
+}
+
+/**
+ * Identifies the client for rate limiting. Prefers the platform-set header, which
+ * Vercel overwrites and clients cannot spoof, over the client-controllable X-Forwarded-For.
+ */
+export function clientIdentifier(headers: Headers): string {
+  const raw = headers.get('x-vercel-forwarded-for') ?? headers.get('x-real-ip') ?? headers.get('x-forwarded-for') ?? 'local';
+  return raw.split(',')[0].trim().slice(0, 64) || 'local';
+}
+
+/**
+ * Rejects cross-site browser requests so other websites cannot spend this deployment's
+ * Gemini quota through visitors' browsers. Non-browser clients send neither header.
+ */
+export function isCrossSiteRequest(request: Request): boolean {
+  const fetchSite = request.headers.get('sec-fetch-site');
+  if (fetchSite && fetchSite !== 'same-origin' && fetchSite !== 'none') return true;
+  const origin = request.headers.get('origin');
+  if (!origin) return false;
+  try {
+    return new URL(origin).host !== new URL(request.url).host;
+  } catch {
+    return true;
+  }
 }
 
 const json = (body: unknown, status = 200) =>
@@ -430,10 +472,10 @@ export async function handleGenAIRequest(request: Request, env: HandlerEnv, fetc
   if (!(request.headers.get('content-type') ?? '').includes('application/json')) {
     return json({ error: 'Content-Type must be application/json.' }, 415);
   }
+  if (isCrossSiteRequest(request)) return json({ error: 'Cross-site requests are not allowed.' }, 403);
   if (!env.GEMINI_API_KEY) return json({ error: 'AI service is not configured.' }, 503);
 
-  const clientKey = (request.headers.get('x-forwarded-for') ?? 'local').split(',')[0].trim();
-  if (isRateLimited(clientKey)) return json({ error: 'Too many AI requests. Please wait a minute.' }, 429);
+  if (isRateLimited(clientIdentifier(request.headers))) return json({ error: 'Too many AI requests. Please wait a minute.' }, 429);
 
   const bodyText = await request.text();
   if (bodyText.length > LIMITS.maxBodyBytes) return json({ error: 'Request too large.' }, 413);

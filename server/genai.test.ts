@@ -3,6 +3,8 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   buildPrompt,
   handleGenAIRequest,
+  clientIdentifier,
+  isCrossSiteRequest,
   isRateLimited,
   matchPrecedent,
   normalizeAnalyze,
@@ -175,6 +177,22 @@ describe('GenAI gateway - HTTP handler', () => {
     expect(res.status).toBe(502);
     const body = await res.json();
     expect(JSON.stringify(body)).not.toContain('abc');
+  });
+
+  it('rejects cross-site browser requests before spending Gemini quota', async () => {
+    const fetchImpl = geminiReply({});
+    const crossSite = await handleGenAIRequest(post(qaRequest, { origin: 'https://evil.example', 'sec-fetch-site': 'cross-site' }), env, fetchImpl);
+    expect(crossSite.status).toBe(403);
+    const foreignOrigin = await handleGenAIRequest(post(qaRequest, { origin: 'https://evil.example' }), env, fetchImpl);
+    expect(foreignOrigin.status).toBe(403);
+    expect(fetchImpl).not.toHaveBeenCalled();
+    expect(isCrossSiteRequest(post(qaRequest, { origin: 'http://localhost', 'sec-fetch-site': 'same-origin' }))).toBe(false);
+  });
+
+  it('prefers the platform-set client IP header over spoofable X-Forwarded-For', () => {
+    const headers = new Headers({ 'x-forwarded-for': '1.1.1.1', 'x-vercel-forwarded-for': '9.9.9.9' });
+    expect(clientIdentifier(headers)).toBe('9.9.9.9');
+    expect(clientIdentifier(new Headers({ 'x-forwarded-for': '2.2.2.2, 3.3.3.3' }))).toBe('2.2.2.2');
   });
 
   it('rate-limits a single client after the per-minute budget', () => {

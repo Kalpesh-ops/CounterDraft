@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { LegalDocument, GroundedQAResponse } from '../types/legal';
 import { queryDocumentGrounded } from '../services/legalEngine';
 import { askDocumentAI } from '../services/genai';
@@ -31,6 +31,10 @@ export const GroundedQA: React.FC<GroundedQAProps> = ({
   ]);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [notice, setNotice] = useState<string>('');
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Abandon an in-flight Gemini request if the user leaves the Q&A workspace.
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const suggestedQuestions = useMemo(() => document.id.includes('lease')
     ? [
@@ -59,10 +63,14 @@ export const GroundedQA: React.FC<GroundedQAProps> = ({
     setIsProcessing(true);
     setNotice('');
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     let response: GroundedQAResponse;
     try {
-      response = await askDocumentAI(document, cleanQuestion);
+      response = await askDocumentAI(document, cleanQuestion, controller.signal);
     } catch {
+      if (controller.signal.aborted) return;
       // Graceful degradation to the deterministic statutory retriever.
       response = queryDocumentGrounded(document, cleanQuestion);
       setNotice('Gemini is unavailable right now, so this answer comes from the offline statutory rule engine.');

@@ -5,7 +5,7 @@
 [![CI/CD Pipeline](https://github.com/Kalpesh-ops/CounterDraft/actions/workflows/ci.yml/badge.svg)](https://github.com/Kalpesh-ops/CounterDraft/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![GenAI: Google Gemini](https://img.shields.io/badge/GenAI-Google_Gemini-1a73e8.svg)](#2-approach-grounded-genai)
-[![Tests Passing](https://img.shields.io/badge/Tests-51%20passing-brightgreen.svg)](#testing)
+[![Tests Passing](https://img.shields.io/badge/Tests-63%20passing-brightgreen.svg)](#testing)
 
 ---
 
@@ -183,7 +183,7 @@ npm run build
 
 ### Testing
 
-`npm test` runs 51 Vitest tests covering the statutory engine, input sanitisation, the GenAI gateway (validation, prompt-injection fencing, quote and precedent verification, HTTP handling, and rate limiting, with Gemini mocked), the GenAI client merge and fallback logic, and UI navigation.
+`npm test` runs 63 Vitest tests covering the statutory engine, input sanitisation, the GenAI gateway (validation, prompt-injection fencing, quote and precedent verification, cross-site request blocking, HTTP handling, and rate limiting, with Gemini mocked), the GenAI client merge and fallback logic, accessible dialogs (focus trap, Escape, focus restore), the Gemini upload, Q&A and Explain Simply flows including failure fallbacks and opt-out, and UI navigation.
 
 ---
 
