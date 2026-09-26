@@ -2,6 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
   buildPrompt,
+  callGemini,
   handleGenAIRequest,
   clientIdentifier,
   isCrossSiteRequest,
@@ -177,6 +178,22 @@ describe('GenAI gateway - HTTP handler', () => {
     expect(res.status).toBe(502);
     const body = await res.json();
     expect(JSON.stringify(body)).not.toContain('abc');
+  });
+
+  it('retries a transient Gemini 503 once and then succeeds', async () => {
+    const ok = geminiReply({ explanation: 'ok' });
+    const fetchImpl = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response('overloaded', { status: 503 }))
+      .mockImplementationOnce(ok);
+    const result = await callGemini('sys', 'user', { apiKey: 'k', model: 'm', fetchImpl, retryDelayMs: 0 });
+    expect(result).toEqual({ explanation: 'ok' });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry client errors such as 400', async () => {
+    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(new Response('bad request', { status: 400 }));
+    await expect(callGemini('sys', 'user', { apiKey: 'k', model: 'm', fetchImpl, retryDelayMs: 0 })).rejects.toThrow('AI service request failed.');
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
   it('rejects cross-site browser requests before spending Gemini quota', async () => {

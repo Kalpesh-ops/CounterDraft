@@ -31,7 +31,7 @@ The application will be served at `http://localhost:5173/`.
 
 ## 2. Testing & Quality Assurance
 
-CounterDraft uses **Vitest** with **Testing Library** (82 tests) and enforces coverage thresholds in CI (statements 85%, lines 85%, functions 80%, branches 70%; current: ~88% statements, ~91% lines):
+CounterDraft uses **Vitest** with **Testing Library** (84 tests) and enforces coverage thresholds in CI (statements 85%, lines 85%, functions 80%, branches 70%; current: ~88% statements, ~91% lines):
 
 ```bash
 npm test                 # full suite, single run

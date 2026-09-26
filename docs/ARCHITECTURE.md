@@ -167,6 +167,6 @@ CounterDraft utilizes localized, reactive React state (`useState`) without exter
 1. The browser sends `{ task, ...payload }` to same-origin `POST /api/genai` (60 s client timeout, abortable).
 2. `server/genai.ts` rejects cross-site requests, applies the per-client rate limit, enforces JSON and size limits, and validates the payload against task-specific schemas.
 3. A task prompt is built with the curated precedent corpus in the system instruction and all user text fenced as untrusted data.
-4. Gemini `generateContent` is called in JSON mode (temperature 0.2, 45 s timeout).
+4. Gemini `generateContent` is called in JSON mode (temperature 0.2, one 45 s deadline). A transient 500/502/503/504 is retried once after 600 ms; client errors and 429s are not retried.
 5. Output is normalised: clause numbers must exist in the request, enums are clamped, strings length-capped, quotes verified verbatim, precedents matched to the corpus.
 6. The browser merges the result over the rule-engine analysis (verbatim text untouched) and labels its provenance; any failure falls back to the rule engine.

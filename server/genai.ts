@@ -352,6 +352,8 @@ export interface GeminiOptions {
   model: string;
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
+  /** Pause before the single retry of a transient upstream failure (default 600 ms). */
+  retryDelayMs?: number;
 }
 
 /** Extracts the first JSON object from model text, tolerating stray markdown fences. */
@@ -366,19 +368,32 @@ export function parseModelJson(text: string): unknown {
   }
 }
 
+/** Upstream statuses worth one retry: Gemini returns these transiently under load. */
+const RETRYABLE_STATUSES = new Set([500, 502, 503, 504]);
+const RETRY_DELAY_MS = 600;
+
 export async function callGemini(system: string, user: string, opts: GeminiOptions): Promise<unknown> {
   const fetchImpl = opts.fetchImpl ?? fetch;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(opts.model)}:generateContent`;
-  const response = await fetchImpl(url, {
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: system }] },
+    contents: [{ role: 'user', parts: [{ text: user }] }],
+    generationConfig: { responseMimeType: 'application/json', temperature: 0.2, maxOutputTokens: 8_192 },
+  });
+  // One deadline covers both attempts, so a retry can never exceed the function's time budget.
+  const signal = AbortSignal.timeout(opts.timeoutMs ?? 45_000);
+  const send = () => fetchImpl(url, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-goog-api-key': opts.apiKey },
-    signal: AbortSignal.timeout(opts.timeoutMs ?? 45_000),
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
-      contents: [{ role: 'user', parts: [{ text: user }] }],
-      generationConfig: { responseMimeType: 'application/json', temperature: 0.2, maxOutputTokens: 8_192 },
-    }),
+    signal,
+    body,
   });
+
+  let response = await send();
+  if (RETRYABLE_STATUSES.has(response.status)) {
+    await new Promise((resolve) => setTimeout(resolve, opts.retryDelayMs ?? RETRY_DELAY_MS));
+    response = await send();
+  }
 
   if (response.status === 429) throw new GenAIError('AI service is busy. Please retry shortly.', 429);
   if (!response.ok) throw new GenAIError('AI service request failed.', 502);

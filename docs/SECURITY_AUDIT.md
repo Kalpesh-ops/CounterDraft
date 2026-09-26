@@ -41,7 +41,7 @@ The former inline frame-busting script was removed so the CSP can use `script-sr
 - **Input limits**: JSON-only, 150 KB body cap, max 60 clauses / 60,000 characters, control-character stripping, task and language allow-lists.
 - **Prompt injection**: user text is wrapped in `<contract>` / `<question>` delimiters, closing tags inside user text are neutralised, and the system instruction treats delimited text as untrusted data.
 - **Output verification**: quotes must appear verbatim in the cited clause; precedents must match the curated corpus; enums and clause numbers are clamped to known values; strings are length-capped. React renders all output as escaped text.
-- **Abuse & errors**: cross-site browser requests rejected (`Sec-Fetch-Site` / `Origin` check), per-client rate limit keyed on the platform-set client IP (20 requests/minute per instance, bounded memory), 45 s upstream timeout, generic error messages without upstream details, `Cache-Control: no-store`.
+- **Abuse & errors**: cross-site browser requests rejected (`Sec-Fetch-Site` / `Origin` check), per-client rate limit keyed on the platform-set client IP (20 requests/minute per instance, bounded memory), 45 s upstream deadline covering one retry of transient 5xx errors (never 4xx), generic error messages without upstream details, `Cache-Control: no-store`.
 
 ### 2.4 Cryptographic Headers & Content Security Policy
 Enforced as response headers in `vercel.json` (with a `<meta>` fallback in `index.html`). No inline scripts or styles are permitted:
