@@ -160,6 +160,7 @@ export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) =>
   );
 
   const completedCount = useMemo(() => items.filter((i) => i.completed).length, [items]);
+  const completionPercent = Math.round((completedCount / (items.length || 1)) * 100);
 
   return (
     <div className="checklist-container">
@@ -192,11 +193,16 @@ export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) =>
                 {completedCount} of {items.length} Completed
               </span>
             </div>
-            <div className="progress-bar-container">
-              <div
-                className="progress-bar-fill"
-                style={{ width: `${Math.round((completedCount / (items.length || 1)) * 100)}%` }}
-              />
+            <div
+              className="progress-bar-container"
+              role="progressbar"
+              aria-label="Checklist completion"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={completionPercent}
+            >
+              {/* Width is data-driven, so it is the one style set inline. */}
+              <div className="progress-bar-fill" style={{ width: `${completionPercent}%` }} />
             </div>
             <p className="summary-paragraph">
               Executing these strategic steps prior to signature and upon contract termination mitigates the severe liabilities identified in the document audit.
@@ -236,6 +242,7 @@ export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) =>
             <button
               type="button"
               className={`filter-btn ${activeStageFilter === 'all' ? 'active' : ''}`}
+              aria-pressed={activeStageFilter === 'all'}
               onClick={() => setActiveStageFilter('all')}
             >
               All Stages ({items.length})
@@ -243,6 +250,7 @@ export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) =>
             <button
               type="button"
               className={`filter-btn ${activeStageFilter === 'pre_signing' ? 'active' : ''}`}
+              aria-pressed={activeStageFilter === 'pre_signing'}
               onClick={() => setActiveStageFilter('pre_signing')}
             >
               Pre-Signing Due Diligence
@@ -250,6 +258,7 @@ export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) =>
             <button
               type="button"
               className={`filter-btn ${activeStageFilter === 'active_term' ? 'active' : ''}`}
+              aria-pressed={activeStageFilter === 'active_term'}
               onClick={() => setActiveStageFilter('active_term')}
             >
               Active Term Covenants
@@ -257,6 +266,7 @@ export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) =>
             <button
               type="button"
               className={`filter-btn ${activeStageFilter === 'termination_exit' ? 'active' : ''}`}
+              aria-pressed={activeStageFilter === 'termination_exit'}
               onClick={() => setActiveStageFilter('termination_exit')}
             >
               Exit & Handover Protocols
@@ -312,14 +322,19 @@ export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) =>
       <div className="add-item-card">
         <span className="section-eyebrow">ADD CUSTOM COMPLIANCE MILESTONE</span>
         <form onSubmit={handleAddItem} className="add-item-form">
+          <label htmlFor="new-milestone-title" className="visually-hidden">Custom milestone description</label>
           <input
+            id="new-milestone-title"
             type="text"
+            maxLength={200}
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder="Add custom compliance milestone (e.g. 'Inspect electrical meters on move-in day')..."
             className="styled-search-input"
           />
+          <label htmlFor="new-milestone-stage" className="visually-hidden">Milestone stage</label>
           <select
+            id="new-milestone-stage"
             value={newStage}
             onChange={(e) => setNewStage(e.target.value as ChecklistItem['stage'])}
             className="styled-select-compact"

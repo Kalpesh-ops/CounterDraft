@@ -1,4 +1,7 @@
-import type { LegalDocument, ClauseAnalysis, RiskLevel, ObligationItem, GroundedQAResponse, CounselBrief } from '../types/legal';
+import type {
+  LegalDocument, ClauseAnalysis, RiskLevel, ObligationItem, GroundedQAResponse, CounselBrief,
+  NegotiationEmail, FinancialExposureSummary, ComparisonPair, ComparisonDiff
+} from '../types/legal';
 import { courtPrecedents } from '../data/courtPrecedents';
 
 /**
@@ -346,9 +349,11 @@ export function queryDocumentGrounded(doc: LegalDocument, question: string): Gro
   const qLower = question.toLowerCase();
   const matchedClauses: ClauseAnalysis[] = [];
 
+  // Tokenise the question once, not once per clause.
+  const words = qLower.split(/\s+/).filter(w => w.length > 3);
+
   for (const clause of doc.clauses) {
     const textLower = (clause.title + ' ' + clause.originalText + ' ' + clause.plainSummary + ' ' + clause.tags.join(' ')).toLowerCase();
-    const words = qLower.split(/\s+/).filter(w => w.length > 3);
     const hasMatch = words.some(w => textLower.includes(w));
     if (hasMatch) {
       matchedClauses.push(clause);
@@ -485,11 +490,11 @@ export function generateNegotiationEmail(
   doc: LegalDocument,
   senderName: string = 'Prospective Signatory',
   recipientName: string = 'Counterparty'
-): import('../types/legal').NegotiationEmail {
+): NegotiationEmail {
   const highRisks = doc.clauses.filter(c => c.riskLevel === 'high');
   const targetRisks = highRisks.length > 0 ? highRisks.slice(0, 3) : doc.clauses.slice(0, 2);
 
-  let recipientType: import('../types/legal').NegotiationEmail['recipientType'] = 'counterparty';
+  let recipientType: NegotiationEmail['recipientType'] = 'counterparty';
   const docLower = doc.documentType.toLowerCase();
   if (docLower.includes('lease') || docLower.includes('tenancy')) {
     recipientType = 'landlord';
@@ -533,7 +538,7 @@ export function generateNegotiationEmail(
  * @param doc - The audited LegalDocument.
  * @returns FinancialExposureSummary with itemized exposure ratings.
  */
-export function calculateFinancialExposure(doc: LegalDocument): import('../types/legal').FinancialExposureSummary {
+export function calculateFinancialExposure(doc: LegalDocument): FinancialExposureSummary {
   let depositAtRisk = 'Standard terms (no excessive deposit detected)';
   let potentialPenaltyRate = 'Standard interest rate';
   let noticeWageExposure = 'Standard mutual notice period';
@@ -598,8 +603,8 @@ export function calculateFinancialExposure(doc: LegalDocument): import('../types
  * @param docB - Revised or counterparty draft version.
  * @returns ComparisonPair containing itemized diffs and aggregate favorability shift.
  */
-export function compareCustomDocuments(docA: LegalDocument, docB: LegalDocument): import('../types/legal').ComparisonPair {
-  const diffs: import('../types/legal').ComparisonDiff[] = [];
+export function compareCustomDocuments(docA: LegalDocument, docB: LegalDocument): ComparisonPair {
+  const diffs: ComparisonDiff[] = [];
 
   const maxLen = Math.max(docA.clauses.length, docB.clauses.length);
 
@@ -612,7 +617,7 @@ export function compareCustomDocuments(docA: LegalDocument, docB: LegalDocument)
       const riskHigher = (clauseB.riskLevel === 'high' && clauseA.riskLevel !== 'high') ||
                          (clauseB.riskLevel === 'caution' && clauseA.riskLevel === 'standard');
 
-      let riskImpact: import('../types/legal').ComparisonDiff['riskImpact'] = 'neutral';
+      let riskImpact: ComparisonDiff['riskImpact'] = 'neutral';
       if (!isIdentical && riskHigher) {
         riskImpact = 'worse_for_user';
       } else if (!isIdentical && clauseB.riskLevel === 'favorable') {
@@ -660,7 +665,7 @@ export function compareCustomDocuments(docA: LegalDocument, docB: LegalDocument)
   }
 
   const worseCount = diffs.filter(d => d.riskImpact === 'worse_for_user').length;
-  let netFavorabilityShift: import('../types/legal').ComparisonPair['netFavorabilityShift'] = 'balanced';
+  let netFavorabilityShift: ComparisonPair['netFavorabilityShift'] = 'balanced';
   if (worseCount >= 3) netFavorabilityShift = 'substantially_worse';
   else if (worseCount >= 1) netFavorabilityShift = 'moderately_worse';
 

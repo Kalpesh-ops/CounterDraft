@@ -24,8 +24,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log error internally in memory without transmitting confidential data to external servers
-    console.error('CounterDraft Client-Side Boundary Caught Error:', error, errorInfo);
+    // Development-only diagnostics: production builds never log, so contract text cannot leak into consoles or log collectors.
+    if (import.meta.env.DEV) {
+      console.error('CounterDraft Client-Side Boundary Caught Error:', error, errorInfo);
+    }
   }
 
   private handleReset = () => {
@@ -37,7 +39,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="error-boundary-wrapper">
-          <div className="error-boundary-card">
+          <div className="error-boundary-card" role="alert">
             <span className="section-eyebrow">RUNTIME FAULT ISOLATION</span>
             <h2 className="panel-heading-text">Workspace Rendering Fault Prevented</h2>
             <p className="boundary-description">
@@ -47,7 +49,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="boundary-details">
               <strong>Error Trace:</strong> {this.state.errorMessage}
             </div>
-            <div className="modal-actions-bar" style={{ marginTop: '16px' }}>
+            <div className="modal-actions-bar section-spaced">
               <button
                 type="button"
                 onClick={this.handleReset}

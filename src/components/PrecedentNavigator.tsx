@@ -47,8 +47,11 @@ export const PrecedentNavigator: React.FC = () => {
         <div className="precedent-search-bar">
           <div className="search-input-box">
             <SearchIcon size={16} />
+            <label htmlFor="precedent-search" className="visually-hidden">Search judicial precedents</label>
             <input
-              type="text"
+              id="precedent-search"
+              type="search"
+              maxLength={200}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by case name, citation, legal doctrine, or keyword (e.g. non-compete, deposit, adhesion)..."
@@ -97,8 +100,12 @@ export const PrecedentNavigator: React.FC = () => {
                   onClick={() => setActivePrecedentId(item.id)}
                   role="button"
                   tabIndex={0}
+                  aria-pressed={isSelected}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') setActivePrecedentId(item.id);
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setActivePrecedentId(item.id);
+                    }
                   }}
                 >
                   <div className="card-top-line">

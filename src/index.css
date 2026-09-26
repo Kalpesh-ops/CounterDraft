@@ -1192,7 +1192,7 @@ textarea:focus {
 .qa-marker {
   font-family: var(--font-serif);
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--marine-blue);
 }
 
@@ -2935,4 +2935,13 @@ textarea:focus-visible {
   background-color: var(--bg-card);
   padding: 9px 12px;
   min-height: 40px;
+}
+
+/* Spacing utilities (replace former inline styles) */
+.field-label-spaced {
+  margin-top: 8px;
+}
+
+.section-spaced {
+  margin-top: 16px;
 }

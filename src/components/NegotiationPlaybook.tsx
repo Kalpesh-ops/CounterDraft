@@ -111,7 +111,7 @@ export const NegotiationPlaybook: React.FC<NegotiationPlaybookProps> = ({ docume
         </div>
 
         {/* Sender & Recipient Inputs */}
-        <div className="form-row-grid" style={{ marginTop: '16px' }}>
+        <div className="form-row-grid section-spaced">
           <div className="form-group">
             <label htmlFor="sender-name-input" className="field-label">
               YOUR NAME / ENTITY:

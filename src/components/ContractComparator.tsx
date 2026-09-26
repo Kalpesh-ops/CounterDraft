@@ -187,6 +187,7 @@ Consultant shall indemnify and hold harmless Client for any third-party claims. 
             <button
               type="button"
               className={`filter-btn ${activeDiffFilter === 'all' ? 'active' : ''}`}
+              aria-pressed={activeDiffFilter === 'all'}
               onClick={() => setActiveDiffFilter('all')}
             >
               All Deviations ({currentPair.diffs.length})
@@ -194,6 +195,7 @@ Consultant shall indemnify and hold harmless Client for any third-party claims. 
             <button
               type="button"
               className={`filter-btn btn-filter-high ${activeDiffFilter === 'worse_for_user' ? 'active' : ''}`}
+              aria-pressed={activeDiffFilter === 'worse_for_user'}
               onClick={() => setActiveDiffFilter('worse_for_user')}
             >
               Unfavorable Shifts ({impactCounts.worse_for_user})
@@ -201,6 +203,7 @@ Consultant shall indemnify and hold harmless Client for any third-party claims. 
             <button
               type="button"
               className={`filter-btn btn-filter-standard ${activeDiffFilter === 'neutral' ? 'active' : ''}`}
+              aria-pressed={activeDiffFilter === 'neutral'}
               onClick={() => setActiveDiffFilter('neutral')}
             >
               Neutral ({impactCounts.neutral})
@@ -325,7 +328,7 @@ Consultant shall indemnify and hold harmless Client for any third-party claims. 
                 onChange={(e) => setDocATitle(e.target.value)}
                 className="styled-search-input"
               />
-              <label htmlFor="doc-a-text" className="field-label" style={{ marginTop: '8px' }}>
+              <label htmlFor="doc-a-text" className="field-label field-label-spaced">
                 DOCUMENT A TEXT:
               </label>
               <textarea
@@ -349,7 +352,7 @@ Consultant shall indemnify and hold harmless Client for any third-party claims. 
                 onChange={(e) => setDocBTitle(e.target.value)}
                 className="styled-search-input"
               />
-              <label htmlFor="doc-b-text" className="field-label" style={{ marginTop: '8px' }}>
+              <label htmlFor="doc-b-text" className="field-label field-label-spaced">
                 DOCUMENT B TEXT:
               </label>
               <textarea
@@ -363,7 +366,7 @@ Consultant shall indemnify and hold harmless Client for any third-party claims. 
             </div>
           </div>
 
-          {comparisonError && <div className="form-error-banner">{comparisonError}</div>}
+          {comparisonError && <div className="form-error-banner" role="alert">{comparisonError}</div>}
 
           <div className="modal-actions-bar">
             <button

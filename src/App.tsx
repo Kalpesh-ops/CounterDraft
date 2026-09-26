@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useMemo, useState } from 'react';
 import { sampleContracts } from './data/sampleContracts';
 import type { LegalDocument } from './types/legal';
 import { Header } from './components/Header';
@@ -27,18 +27,31 @@ export const App: React.FC = () => {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState<boolean>(false);
   const [qaPrefillQuery, setQaPrefillQuery] = useState<string>('');
 
-  const currentDoc = documents.find((d) => d.id === activeDocId) || documents[0];
+  const currentDoc = useMemo(
+    () => documents.find((d) => d.id === activeDocId) || documents[0],
+    [documents, activeDocId]
+  );
 
-  const handleDocumentLoaded = (newDoc: LegalDocument) => {
+  // Stable handler identities let the memoised Header and workspaces skip needless re-renders.
+  const openUpload = useCallback(() => setIsUploadOpen(true), []);
+  const closeUpload = useCallback(() => setIsUploadOpen(false), []);
+  const openTerms = useCallback(() => setIsTermsOpen(true), []);
+  const closeTerms = useCallback(() => setIsTermsOpen(false), []);
+  const openPrivacy = useCallback(() => setIsPrivacyOpen(true), []);
+  const closePrivacy = useCallback(() => setIsPrivacyOpen(false), []);
+  const showAuditor = useCallback(() => setActiveTab('auditor'), []);
+  const showPrecedents = useCallback(() => setActiveTab('precedents'), []);
+
+  const handleDocumentLoaded = useCallback((newDoc: LegalDocument) => {
     setDocuments((prev) => [newDoc, ...prev]);
     setActiveDocId(newDoc.id);
     setActiveTab('auditor');
-  };
+  }, []);
 
-  const handleSelectClauseForQA = (clauseNumber: string) => {
+  const handleSelectClauseForQA = useCallback((clauseNumber: string) => {
     setQaPrefillQuery(`What does ${clauseNumber} obligate me to do, and what are my legal protections?`);
     setActiveTab('qa');
-  };
+  }, []);
 
   return (
     <div className="juris-app">
@@ -46,9 +59,9 @@ export const App: React.FC = () => {
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onOpenUpload={() => setIsUploadOpen(true)}
-        onOpenTerms={() => setIsTermsOpen(true)}
-        onOpenPrivacy={() => setIsPrivacyOpen(true)}
+        onOpenUpload={openUpload}
+        onOpenTerms={openTerms}
+        onOpenPrivacy={openPrivacy}
         activeDocTitle={currentDoc.title}
       />
 
@@ -60,7 +73,7 @@ export const App: React.FC = () => {
               key={currentDoc.id}
               document={currentDoc}
               onSelectClauseForQA={handleSelectClauseForQA}
-              onSwitchDocument={(id) => setActiveDocId(id)}
+              onSwitchDocument={setActiveDocId}
               allDocuments={documents}
             />
           )}
@@ -78,7 +91,7 @@ export const App: React.FC = () => {
               key={currentDoc.id}
               document={currentDoc}
               initialQuery={qaPrefillQuery}
-              onNavigateToClause={() => setActiveTab('auditor')}
+              onNavigateToClause={showAuditor}
             />
           )}
 
@@ -111,15 +124,15 @@ export const App: React.FC = () => {
 
           <div className="footer-right">
             <div className="footer-links-row">
-              <button type="button" onClick={() => setIsTermsOpen(true)} className="footer-link">
+              <button type="button" onClick={openTerms} className="footer-link">
                 Terms of Service
               </button>
               <span className="footer-sep">•</span>
-              <button type="button" onClick={() => setIsPrivacyOpen(true)} className="footer-link">
+              <button type="button" onClick={openPrivacy} className="footer-link">
                 Privacy Policy
               </button>
               <span className="footer-sep">•</span>
-              <button type="button" onClick={() => setActiveTab('precedents')} className="footer-link">
+              <button type="button" onClick={showPrecedents} className="footer-link">
                 Judicial Precedent Index
               </button>
               <span className="footer-sep">•</span>
@@ -143,12 +156,12 @@ export const App: React.FC = () => {
         {isUploadOpen && (
           <DocumentUploader
             isOpen={isUploadOpen}
-            onClose={() => setIsUploadOpen(false)}
+            onClose={closeUpload}
             onDocumentLoaded={handleDocumentLoaded}
           />
         )}
-        {isTermsOpen && <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />}
-        {isPrivacyOpen && <PrivacyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />}
+        {isTermsOpen && <TermsModal isOpen={isTermsOpen} onClose={closeTerms} />}
+        {isPrivacyOpen && <PrivacyModal isOpen={isPrivacyOpen} onClose={closePrivacy} />}
       </Suspense>
     </div>
   );

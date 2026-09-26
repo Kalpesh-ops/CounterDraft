@@ -157,6 +157,7 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
             <button
               type="button"
               className={`filter-btn ${selectedRiskFilter === 'all' ? 'active' : ''}`}
+              aria-pressed={selectedRiskFilter === 'all'}
               onClick={() => setSelectedRiskFilter('all')}
             >
               All ({document.clauses.length})
@@ -164,6 +165,7 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
             <button
               type="button"
               className={`filter-btn btn-filter-high ${selectedRiskFilter === 'high' ? 'active' : ''}`}
+              aria-pressed={selectedRiskFilter === 'high'}
               onClick={() => setSelectedRiskFilter('high')}
             >
               High Risk ({document.riskSummary.highCount})
@@ -171,6 +173,7 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
             <button
               type="button"
               className={`filter-btn btn-filter-caution ${selectedRiskFilter === 'caution' ? 'active' : ''}`}
+              aria-pressed={selectedRiskFilter === 'caution'}
               onClick={() => setSelectedRiskFilter('caution')}
             >
               Caution ({document.riskSummary.cautionCount})
@@ -178,6 +181,7 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
             <button
               type="button"
               className={`filter-btn btn-filter-standard ${selectedRiskFilter === 'standard' ? 'active' : ''}`}
+              aria-pressed={selectedRiskFilter === 'standard'}
               onClick={() => setSelectedRiskFilter('standard')}
             >
               Standard ({document.riskSummary.standardCount})
@@ -230,6 +234,7 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
                   role="button"
                   tabIndex={0}
                   aria-expanded={isExpanded}
+                  aria-label={`${clause.clauseNumber}: ${clause.title}, ${clause.riskLevel} risk. ${isExpanded ? 'Collapse' : 'Expand'} details`}
                   aria-controls={`clause-detail-${clause.id}`}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {

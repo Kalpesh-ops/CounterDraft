@@ -66,7 +66,16 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, labelledBy, class
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    // Backdrop click is a pointer convenience; the keyboard equivalent is Escape, handled above.
+    // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+    <div
+      className="modal-backdrop"
+      role="presentation"
+      onClick={(e) => {
+        // Close only for clicks on the backdrop itself, never for clicks inside the dialog.
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div
         ref={panelRef}
         className={`modal-folio${className ? ` ${className}` : ''}`}
@@ -74,7 +83,6 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, labelledBy, class
         aria-modal="true"
         aria-labelledby={labelledBy}
         tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
       >
         {children}
       </div>

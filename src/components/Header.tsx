@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { ScalesIcon, DocumentIcon, CompareIcon, SearchIcon, GavelIcon, ChecklistIcon, BriefcaseIcon, PlusIcon } from './Icons';
 
 export type ActiveTab = 'auditor' | 'comparator' | 'qa' | 'precedents' | 'playbook' | 'checklist' | 'counsel';
@@ -22,14 +22,15 @@ interface HeaderProps {
   activeDocTitle: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({
+/** Masthead and tab navigation; memoised because it re-renders only when its props change. */
+export const Header = memo<HeaderProps>(function Header({
   activeTab,
   setActiveTab,
   onOpenUpload,
   onOpenTerms,
   onOpenPrivacy,
   activeDocTitle
-}) => {
+}) {
   return (
     <header className="site-header">
       <a href="#main-content" className="skip-link">Skip to main content</a>
@@ -100,4 +101,4 @@ export const Header: React.FC<HeaderProps> = ({
       </nav>
     </header>
   );
-};
+});
