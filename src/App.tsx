@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { sampleContracts } from './data/sampleContracts';
 import type { LegalDocument } from './types/legal';
 import { Header } from './components/Header';
 import type { ActiveTab } from './components/Header';
 import { DocumentAuditor } from './components/DocumentAuditor';
-import { ContractComparator } from './components/ContractComparator';
-import { GroundedQA } from './components/GroundedQA';
-import { PrecedentNavigator } from './components/PrecedentNavigator';
-import { NegotiationPlaybook } from './components/NegotiationPlaybook';
-import { ActionChecklist } from './components/ActionChecklist';
-import { CounselBriefGenerator } from './components/CounselBriefGenerator';
 import { DocumentUploader } from './components/DocumentUploader';
 import { TermsModal } from './components/TermsModal';
 import { PrivacyModal } from './components/PrivacyModal';
 import { ScalesIcon } from './components/Icons';
+
+// Secondary workspaces are code-split so the initial bundle only ships the auditor.
+const ContractComparator = lazy(() => import('./components/ContractComparator').then((m) => ({ default: m.ContractComparator })));
+const GroundedQA = lazy(() => import('./components/GroundedQA').then((m) => ({ default: m.GroundedQA })));
+const PrecedentNavigator = lazy(() => import('./components/PrecedentNavigator').then((m) => ({ default: m.PrecedentNavigator })));
+const NegotiationPlaybook = lazy(() => import('./components/NegotiationPlaybook').then((m) => ({ default: m.NegotiationPlaybook })));
+const ActionChecklist = lazy(() => import('./components/ActionChecklist').then((m) => ({ default: m.ActionChecklist })));
+const CounselBriefGenerator = lazy(() => import('./components/CounselBriefGenerator').then((m) => ({ default: m.CounselBriefGenerator })));
 
 export const App: React.FC = () => {
   const [documents, setDocuments] = useState<LegalDocument[]>(sampleContracts);
@@ -50,43 +52,47 @@ export const App: React.FC = () => {
       />
 
       {/* Main Workspace Area */}
-      <main className="main-content-area">
-        {activeTab === 'auditor' && (
-          <DocumentAuditor
-            document={currentDoc}
-            onSelectClauseForQA={handleSelectClauseForQA}
-            onSwitchDocument={(id) => setActiveDocId(id)}
-            allDocuments={documents}
-          />
-        )}
+      <main className="main-content-area" id="main-content" tabIndex={-1}>
+        <Suspense fallback={<div className="empty-state-card" role="status">Loading workspace…</div>}>
+          {activeTab === 'auditor' && (
+            <DocumentAuditor
+              key={currentDoc.id}
+              document={currentDoc}
+              onSelectClauseForQA={handleSelectClauseForQA}
+              onSwitchDocument={(id) => setActiveDocId(id)}
+              allDocuments={documents}
+            />
+          )}
 
-        {activeTab === 'comparator' && (
-          <ContractComparator />
-        )}
+          {activeTab === 'comparator' && (
+            <ContractComparator />
+          )}
 
-        {activeTab === 'playbook' && (
-          <NegotiationPlaybook document={currentDoc} />
-        )}
+          {activeTab === 'playbook' && (
+            <NegotiationPlaybook key={currentDoc.id} document={currentDoc} />
+          )}
 
-        {activeTab === 'qa' && (
-          <GroundedQA
-            document={currentDoc}
-            initialQuery={qaPrefillQuery}
-            onNavigateToClause={() => setActiveTab('auditor')}
-          />
-        )}
+          {activeTab === 'qa' && (
+            <GroundedQA
+              key={currentDoc.id}
+              document={currentDoc}
+              initialQuery={qaPrefillQuery}
+              onNavigateToClause={() => setActiveTab('auditor')}
+            />
+          )}
 
-        {activeTab === 'precedents' && (
-          <PrecedentNavigator />
-        )}
+          {activeTab === 'precedents' && (
+            <PrecedentNavigator />
+          )}
 
-        {activeTab === 'checklist' && (
-          <ActionChecklist document={currentDoc} />
-        )}
+          {activeTab === 'checklist' && (
+            <ActionChecklist key={currentDoc.id} document={currentDoc} />
+          )}
 
-        {activeTab === 'counsel' && (
-          <CounselBriefGenerator document={currentDoc} />
-        )}
+          {activeTab === 'counsel' && (
+            <CounselBriefGenerator key={currentDoc.id} document={currentDoc} />
+          )}
+        </Suspense>
       </main>
 
       {/* Global Editorial Footer */}
@@ -98,7 +104,7 @@ export const App: React.FC = () => {
               <span>COUNTERDRAFT LEGAL INTELLIGENCE</span>
             </div>
             <p className="footer-text">
-              Engineered to demystify complex legal drafting, balance asymmetrical contracts, and empower non-lawyers with actionable redline counter-drafts and statutory literacy before entering consultations with advocates.
+              A GenAI legal assistant built on Google Gemini, grounded in Indian statute and verified precedent. Engineered to demystify complex legal drafting, balance asymmetrical contracts, and empower non-lawyers with actionable redline counter-drafts and statutory literacy before entering consultations with advocates.
             </p>
           </div>
 

@@ -56,8 +56,10 @@ All pull requests must adhere to our engineering invariants:
 3. **The 30 Negative Design Constraints**:
    - CounterDraft adheres to a classical archival paper publishing aesthetic (`#f8f6f0` background, deep ink typography, sharp borders).
    - **Prohibited**: Emojis, em dashes (`\u2014`), pure white (`#fff`) page backgrounds, drop shadows (`box-shadow`), Lucide icons, neon gradients, rounded corners (`border-radius: 0px`), or fake testimonials.
-4. **Zero-Server Invariant**:
-   - Never introduce outbound network telemetry, remote analytics scripts, or cloud logging. All document intelligence must execute client-side.
+4. **Privacy & GenAI Invariants**:
+   - Never introduce outbound network telemetry, remote analytics scripts, or cloud logging.
+   - All model calls go through `server/genai.ts`; never call Gemini from the browser or expose `GEMINI_API_KEY`.
+   - Every new GenAI output must be validated server-side, and every GenAI feature must fall back to the offline `LegalEngine`.
 
 ---
 

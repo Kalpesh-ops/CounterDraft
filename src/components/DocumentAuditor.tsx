@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { LegalDocument, RiskLevel } from '../types/legal';
 import { safeCopyToClipboard } from '../utils/security';
 import { FilterIcon, ShieldAlertIcon, DocumentIcon } from './Icons';
+import { AnalysisSourceBadge } from './AnalysisSourceBadge';
+import { ClauseExplainer } from './ClauseExplainer';
 
 interface DocumentAuditorProps {
   document: LegalDocument;
@@ -21,7 +23,7 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
   const [expandedClauseId, setExpandedClauseId] = useState<string | null>(document.clauses[1]?.id || document.clauses[0]?.id || null);
   const [copiedClauseId, setCopiedClauseId] = useState<string | null>(null);
 
-  const filteredClauses = document.clauses.filter((clause) => {
+  const filteredClauses = useMemo(() => document.clauses.filter((clause) => {
     if (selectedRiskFilter !== 'all' && clause.riskLevel !== selectedRiskFilter) {
       return false;
     }
@@ -29,7 +31,11 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
       return false;
     }
     return true;
-  });
+  }), [document.clauses, selectedRiskFilter, selectedCategoryFilter]);
+
+  const toggleClause = (clauseId: string) => {
+    setExpandedClauseId((current) => (current === clauseId ? null : clauseId));
+  };
 
   const handleCopyRedline = (clauseId: string, text: string) => {
     safeCopyToClipboard(text).then((success) => {
@@ -45,7 +51,8 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
   return (
     <div className="auditor-container">
       {/* Top Document Selection & Metadata Ledger */}
-      <section className="docket-overview-panel">
+      <section className="docket-overview-panel" aria-labelledby="audit-heading">
+        <h2 id="audit-heading" className="visually-hidden">Contract audit: {document.title}</h2>
         <div className="docket-selector-row">
           <div className="selector-group">
             <label htmlFor="doc-select" className="field-label">
@@ -81,6 +88,7 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
           <div className="exposure-card left-exposure">
             <div className="card-header-line">
               <span className="section-eyebrow">AUDIT SUMMARY</span>
+              <AnalysisSourceBadge source={document.analysisSource} model={document.aiModel} />
               <span className={`risk-badge badge-${document.overallRiskScore >= 70 ? 'high' : document.overallRiskScore >= 45 ? 'caution' : 'standard'}`}>
                 Risk Score: {document.overallRiskScore} / 100
               </span>
@@ -90,6 +98,16 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
               <div><strong>Party A (Originator):</strong> {document.parties.partyA}</div>
               <div><strong>Party B (Recipient / Signatory):</strong> {document.parties.partyB}</div>
             </div>
+            {document.nextSteps && document.nextSteps.length > 0 && (
+              <div className="next-steps-box">
+                <span className="vuln-heading">Your Next Steps:</span>
+                <ol className="vuln-items">
+                  {document.nextSteps.map((step, i) => (
+                    <li key={i}>{step}</li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </div>
 
           <div className="exposure-card right-exposure">
@@ -190,6 +208,7 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
       </div>
 
       {/* Clause Ledger Stream */}
+      <h2 className="visually-hidden">Clause-by-clause risk ledger</h2>
       <div className="clause-stream">
         {filteredClauses.length === 0 ? (
           <div className="empty-state-card">
@@ -207,12 +226,15 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
                 {/* Header Strip */}
                 <div
                   className="clause-card-header"
-                  onClick={() => setExpandedClauseId(isExpanded ? null : clause.id)}
+                  onClick={() => toggleClause(clause.id)}
                   role="button"
                   tabIndex={0}
+                  aria-expanded={isExpanded}
+                  aria-controls={`clause-detail-${clause.id}`}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
-                      setExpandedClauseId(isExpanded ? null : clause.id);
+                      e.preventDefault();
+                      toggleClause(clause.id);
                     }
                   }}
                 >
@@ -240,7 +262,7 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
 
                 {/* Detailed Analysis Dossier (Expanded View) */}
                 {isExpanded && (
-                  <div className="clause-detail-body">
+                  <div className="clause-detail-body" id={`clause-detail-${clause.id}`}>
                     {/* Verbatim Legal Language */}
                     <div className="detail-section">
                       <div className="detail-heading">
@@ -251,6 +273,8 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
                         {clause.originalText}
                       </div>
                     </div>
+
+                    <ClauseExplainer clause={clause} />
 
                     {/* Legal Rationale & Statutory Grounding (2-column balanced layout) */}
                     <div className="rationale-grid">

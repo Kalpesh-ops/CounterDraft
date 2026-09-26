@@ -25,28 +25,26 @@ Legal documents contain confidential commercial agreements, compensation data, i
 
 ### 2.2 Memory-Safe File Upload Pipeline (`src/components/DocumentUploader.tsx`)
 - **Pre-Read Size Verification**: Verifies `file.size <= 2 * 1024 * 1024` (2 MB) before allocating memory in `FileReader`.
-- **Extension & MIME Whitelisting**: Allows only text-based legal document extensions (`.txt`, `.doc`, `.docx`, `.md`, `.rtf`, `.json`, `.legal`, `.contract`). Rejects executables, SVGs, audio, video, and raw binary archives.
+- **Extension & MIME Whitelisting**: Allows only plain-text extensions (`.txt`, `.md`, `.text`) with a `text/*` MIME type. Binary formats (Word, PDF, archives, executables) are rejected with guidance to paste the text instead, because they cannot be decoded faithfully in the browser.
 - **Error Trapping**: Sets `reader.onerror` handlers to gracefully report filesystem read faults without hanging.
 
-### 2.3 Dual-Layer Clickjacking & Framing Defense
-1. **Server Header Defense (`public/_headers`)**:
-   ```http
-   X-Frame-Options: DENY
-   Content-Security-Policy: ... frame-ancestors 'none'; ...
-   ```
-2. **Client-Side Frame Guard (`index.html`)**:
-   ```javascript
-   if (window.top && window.self !== window.top) {
-     try {
-       window.top.location = window.self.location;
-     } catch {
-       document.documentElement.style.display = 'none';
-     }
-   }
-   ```
+### 2.3 Clickjacking & Framing Defense
+Enforced as HTTP response headers in `vercel.json` (header-based, so it cannot be bypassed by disabling scripts):
+```http
+X-Frame-Options: DENY
+Content-Security-Policy: ... frame-ancestors 'none'; ...
+```
+The former inline frame-busting script was removed so the CSP can use `script-src 'self'` without `'unsafe-inline'`.
+
+### 2.3.1 GenAI Gateway (`/api/genai`)
+- **Key isolation**: `GEMINI_API_KEY` exists only in the server environment and is sent to Google in the `x-goog-api-key` header, never in a URL.
+- **Input limits**: JSON-only, 150 KB body cap, max 60 clauses / 60,000 characters, control-character stripping, task and language allow-lists.
+- **Prompt injection**: user text is wrapped in `<contract>` / `<question>` delimiters, closing tags inside user text are neutralised, and the system instruction treats delimited text as untrusted data.
+- **Output verification**: quotes must appear verbatim in the cited clause; precedents must match the curated corpus; enums and clause numbers are clamped to known values; strings are length-capped. React renders all output as escaped text.
+- **Abuse & errors**: per-client rate limit (20 requests/minute per instance), 45 s upstream timeout, generic error messages without upstream details, `Cache-Control: no-store`.
 
 ### 2.4 Cryptographic Headers & Content Security Policy
-Enforced in `index.html` and `public/_headers`:
+Enforced as response headers in `vercel.json` (with a `<meta>` fallback in `index.html`):
 ```http
 default-src 'self';
 script-src 'self' 'unsafe-inline';

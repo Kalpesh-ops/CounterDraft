@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { LegalDocument } from '../types/legal';
 import { generateNegotiationEmail, calculateFinancialExposure } from '../services/legalEngine';
 import { sanitizeInput, safeCopyToClipboard } from '../utils/security';
@@ -21,8 +21,12 @@ export const NegotiationPlaybook: React.FC<NegotiationPlaybookProps> = ({ docume
 
   const cleanSender = sanitizeInput(senderName) || 'Prospective Signatory';
   const cleanRecipient = sanitizeInput(recipientName) || 'Counterparty';
-  const emailDraft = generateNegotiationEmail(document, cleanSender, cleanRecipient);
-  const financialExposure = calculateFinancialExposure(document);
+  const emailDraft = useMemo(
+    () => generateNegotiationEmail(document, cleanSender, cleanRecipient),
+    [document, cleanSender, cleanRecipient]
+  );
+  const financialExposure = useMemo(() => calculateFinancialExposure(document), [document]);
+  const highRiskCount = useMemo(() => document.clauses.filter(c => c.riskLevel === 'high').length, [document.clauses]);
 
   const handleCopyEmail = () => {
     safeCopyToClipboard(`Subject: ${emailDraft.subject}\n\n${emailDraft.bodyText}`).then((success) => {
@@ -61,7 +65,7 @@ export const NegotiationPlaybook: React.FC<NegotiationPlaybookProps> = ({ docume
             <div className="card-header-line">
               <span className="section-eyebrow">FINANCIAL EXPOSURE AUDIT</span>
               <span className="risk-badge badge-high">
-                {document.clauses.filter(c => c.riskLevel === 'high').length} High-Risk Covenants
+                {highRiskCount} High-Risk Covenants
               </span>
             </div>
 

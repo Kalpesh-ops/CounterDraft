@@ -101,7 +101,19 @@ export interface LegalDocument {
   obligations: ObligationItem[];
   /** References to relevant landmark court precedents */
   precedentLinks: string[];
+  /** Practical next steps for the signatory (GenAI-generated when available) */
+  nextSteps?: string[];
+  /** Which engine produced the explanatory layer: Gemini GenAI or the offline statutory rule engine */
+  analysisSource?: AnalysisSource;
+  /** Gemini model identifier used for GenAI analysis */
+  aiModel?: string;
 }
+
+/**
+ * Provenance of an analysis: 'genai' (Google Gemini, grounded and verified server-side)
+ * or 'rules' (deterministic offline statutory engine).
+ */
+export type AnalysisSource = 'genai' | 'rules';
 
 /**
  * Clause-by-clause comparative diff between two contract versions.
@@ -170,6 +182,12 @@ export interface GroundedQAResponse {
   citations: QACitation[];
   precedentRefs: string[];
   suggestedFollowUps: string[];
+  /** Engine that produced the answer */
+  analysisSource?: AnalysisSource;
+  /** Gemini model identifier, when GenAI answered */
+  aiModel?: string;
+  /** Model-proposed quotes rejected because they were not found verbatim in the contract */
+  discardedCitations?: number;
 }
 
 /**

@@ -103,7 +103,7 @@ Compares two contract versions (e.g., standard baseline vs. counterparty markups
 
 ## 5. Architectural Security Profile
 
-- **Engine Location**: 100% Client-Side execution.
-- **Data Retention**: Zero external server transmissions.
+- **Engine Location**: In-browser segmentation and rule engine; Google Gemini via the `/api/genai` server gateway for GenAI features.
+- **Data Retention**: No storage of documents or queries; Gemini calls only when GenAI features are used.
 - **Cryptographic Headers**: Strict Content Security Policy (CSP), X-Frame-Options: DENY, X-Content-Type-Options: nosniff, Referrer-Policy: strict-origin-when-cross-origin.
 - **Sanitization Protocol**: Multi-stage linear input sanitization neutralizing DOM XSS, prototype pollution, and malicious file types.

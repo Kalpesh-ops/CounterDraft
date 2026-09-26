@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { LegalDocument, ObligationItem } from '../types/legal';
 import { sanitizeInput } from '../utils/security';
 import { ChecklistIcon, PlusIcon, DownloadIcon } from './Icons';
@@ -18,8 +18,9 @@ interface ChecklistItem {
   priority: 'urgent' | 'standard';
 }
 
-export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) => {
-  const defaultItems: ChecklistItem[] = [
+/** Builds the starting checklist: universal safeguards plus the document's extracted obligations. */
+function buildDefaultItems(document: LegalDocument): ChecklistItem[] {
+  const safeguards: ChecklistItem[] = [
     {
       id: 'chk-1',
       stage: 'pre_signing',
@@ -82,7 +83,22 @@ export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) =>
     }
   ];
 
-  const [items, setItems] = useState<ChecklistItem[]>(defaultItems);
+  const obligationItems: ChecklistItem[] = document.obligations.slice(0, 6).map((ob: ObligationItem) => ({
+    id: `chk-${ob.id}`,
+    stage: 'active_term',
+    title: ob.action.length > 90 ? ob.action.slice(0, 87) + '…' : ob.action,
+    description: `${ob.responsibleParty} owes this to ${ob.beneficiaryParty}. If missed: ${ob.consequenceOfDefault}`,
+    deadlineOrTiming: ob.timelineOrDeadline,
+    clauseRef: ob.clauseRef,
+    completed: false,
+    priority: ob.status === 'mandatory' ? 'urgent' : 'standard'
+  }));
+
+  return [...safeguards, ...obligationItems];
+}
+
+export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) => {
+  const [items, setItems] = useState<ChecklistItem[]>(() => buildDefaultItems(document));
   const [newTitle, setNewTitle] = useState<string>('');
   const [newStage, setNewStage] = useState<ChecklistItem['stage']>('pre_signing');
   const [activeStageFilter, setActiveStageFilter] = useState<'all' | ChecklistItem['stage']>('all');
@@ -138,12 +154,12 @@ export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) =>
     }, 1000);
   };
 
-  const filteredItems = items.filter((item) => {
-    if (activeStageFilter === 'all') return true;
-    return item.stage === activeStageFilter;
-  });
+  const filteredItems = useMemo(
+    () => (activeStageFilter === 'all' ? items : items.filter((item) => item.stage === activeStageFilter)),
+    [items, activeStageFilter]
+  );
 
-  const completedCount = items.filter((i) => i.completed).length;
+  const completedCount = useMemo(() => items.filter((i) => i.completed).length, [items]);
 
   return (
     <div className="checklist-container">

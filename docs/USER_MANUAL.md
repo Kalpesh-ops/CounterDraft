@@ -29,9 +29,11 @@ CounterDraft is designed to level the playing field between institutional contra
   - *Enterprise Cloud SaaS Master Services Agreement*
 - **Custom Contract Upload**:
   - Click **"Ingest Custom Contract"** in the top navigation bar.
-  - Drop a `.txt`, `.doc`, `.md`, or `.json` file, or paste raw agreement text directly into the input area.
+  - Choose a `.txt` or `.md` file, or paste the agreement text (copy it out of Word or PDF files first).
   - Specify the contract title and category.
-  - Click **"Ingest & Audit Contract"**. Ingestion processes 100% locally in browser memory.
+  - Keep **"Analyse with Google Gemini (GenAI)"** ticked for an AI audit with plain-language explanations, obligations, and next steps, or untick it to process everything locally with the statutory rule engine.
+  - Click **"Analyze & Ingest Docket"**. Each result shows a badge saying whether Gemini or the rule engine produced it.
+- **Explain Simply**: Expand any clause and choose one of 8 languages (English, Hindi, Bengali, Marathi, Tamil, Telugu, Kannada, Gujarati) for a plain-language explanation from Gemini.
 
 ### Step 2: Clause Risk Auditor (`#auditor`)
 - **Risk Badges**: Provisions are color-coded into four tiers:
@@ -67,8 +69,8 @@ CounterDraft is designed to level the playing field between institutional contra
   - Click **"Copy Negotiation Draft"** to paste into your email client.
 
 ### Step 5: Grounded Document Q&A (`#qa`)
-- **Natural Language Search**: Ask specific questions (e.g., *"Can the landlord enter without 24 hours notice?"* or *"Can my employer stop me from joining a competitor?"*).
-- **Verbatim Anchoring**: Returns exact contractual snippets from the active docket.
+- **Ask Gemini**: Ask specific questions in plain language (e.g., *"Can the landlord enter without 24 hours notice?"* or *"Can my employer stop me from joining a competitor?"*). Google Gemini answers using only the active contract.
+- **Verified Quotes**: Every quoted snippet is checked server-side against the clause text; quotes that do not match verbatim are removed, and the answer tells you how many were dropped. If Gemini is unavailable, the offline rule engine answers instead.
 - **Statutory Overrides**: Provides essential legal guidance on whether the contract term is actually enforceable under Indian law.
 
 ### Step 6: Compliance & Safeguard Checklist (`#checklist`)

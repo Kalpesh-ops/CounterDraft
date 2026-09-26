@@ -7,10 +7,10 @@
 ## 1. Technical & Privacy Questions
 
 ### Q1: Where does my uploaded contract go? Does CounterDraft store my documents on a server?
-**Answer**: No. CounterDraft operates under a strict **Zero-Cloud-Retention** architectural invariant. All document ingestion, parsing, comparison, and brief compilation happen 100% locally inside your browser's JavaScript engine. No document text, queries, or generated letters are ever transmitted to or stored on external servers or databases.
+**Answer**: CounterDraft never stores your documents; there is no database. Clause segmentation, comparison, checklists, and briefs run in your browser. When you use the GenAI features (AI audit, Ask Gemini, Explain Simply), the relevant clause text and your question are sent over HTTPS to our server function and on to Google Gemini, then discarded by CounterDraft. You can untick GenAI at upload to keep everything on your device. On the Gemini free tier Google may use submitted content to improve its products, so remove names, addresses, and account numbers first.
 
 ### Q2: What file formats and sizes are supported for contract upload?
-**Answer**: CounterDraft supports plain text files (`.txt`, `.md`, `.rtf`), Microsoft Word documents saved as text (`.doc`, `.docx`), and JSON contract exports up to 2 MB. You can also copy and paste contract text directly into the custom ingestion window.
+**Answer**: Plain-text files (`.txt`, `.md`) up to 2 MB. For Word or PDF contracts, open the file, copy the text, and paste it into the upload window: binary formats cannot be decoded faithfully in the browser.
 
 ### Q3: How does CounterDraft protect against web vulnerabilities like XSS and Clickjacking?
 **Answer**: CounterDraft implements defense-in-depth:

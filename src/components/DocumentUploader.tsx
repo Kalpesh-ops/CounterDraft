@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import type { LegalDocument } from '../types/legal';
 import { parseCustomContract } from '../services/legalEngine';
+import { enrichDocumentWithAI } from '../services/genai';
 import { validateContractPayload } from '../utils/security';
 import { DocumentIcon, CloseIcon } from './Icons';
+import { Modal } from './Modal';
+
+/** Plain-text formats that FileReader.readAsText can decode faithfully. */
+const ACCEPTED_EXTENSIONS = ['.txt', '.md', '.text'];
 
 interface DocumentUploaderProps {
   isOpen: boolean;
@@ -19,8 +24,8 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   const [docType, setDocType] = useState<string>('Commercial Agreement');
   const [rawText, setRawText] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
-
-  if (!isOpen) return null;
+  const [useGenAI, setUseGenAI] = useState<boolean>(true);
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -33,14 +38,13 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
       return;
     }
 
-    // 2. Guard against binary / executable / script-bearing MIME types
+    // 2. Only accept plain-text formats; binary Word/PDF files cannot be decoded as text in the browser
     const fileName = file.name.toLowerCase();
-    const validExtensions = ['.txt', '.doc', '.docx', '.md', '.rtf', '.json', '.legal', '.contract'];
-    const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
-    const isValidMime = !file.type || file.type.startsWith('text/') || file.type === 'application/json' || file.type === 'application/msword';
+    const hasValidExtension = ACCEPTED_EXTENSIONS.some(ext => fileName.endsWith(ext));
+    const isTextMime = !file.type || file.type.startsWith('text/');
 
-    if (!hasValidExtension && !isValidMime) {
-      setErrorMsg('Unsupported file format. Please upload a plain text contract (.txt, .md, .doc, .rtf, or .json).');
+    if (!hasValidExtension || !isTextMime) {
+      setErrorMsg('Unsupported file format. Upload a plain-text contract (.txt or .md), or copy the text from your Word/PDF file and paste it below.');
       e.target.value = '';
       return;
     }
@@ -104,7 +108,7 @@ This Agreement shall be governed by the laws of India. Any legal dispute shall b
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validation = validateContractPayload(rawText, docTitle);
     if (!validation.isValid) {
@@ -112,136 +116,156 @@ This Agreement shall be governed by the laws of India. Any legal dispute shall b
       return;
     }
 
+    let parsedDoc: LegalDocument;
     try {
-      const parsedDoc = parseCustomContract(validation.cleanText, validation.cleanTitle, docType);
-      onDocumentLoaded(parsedDoc);
-      onClose();
+      parsedDoc = parseCustomContract(validation.cleanText, validation.cleanTitle, docType);
     } catch {
       setErrorMsg('Failed to parse text. Please ensure the document contains legible text.');
+      return;
     }
+
+    if (useGenAI) {
+      setIsAnalyzing(true);
+      setErrorMsg('');
+      try {
+        parsedDoc = await enrichDocumentWithAI(parsedDoc);
+      } catch {
+        // Graceful degradation: keep the offline statutory rule-engine analysis.
+        parsedDoc = { ...parsedDoc, analysisSource: 'rules' };
+      } finally {
+        setIsAnalyzing(false);
+      }
+    }
+
+    onDocumentLoaded(parsedDoc);
+    onClose();
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div
-        className="modal-folio"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="upload-modal-title"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Modal Header */}
-        <div className="modal-header">
-          <div className="modal-title-group">
-            <DocumentIcon size={18} />
-            <h2 id="upload-modal-title">UPLOAD OR PASTE CUSTOM CONTRACT FOR AUDIT</h2>
-          </div>
-          <button type="button" onClick={onClose} className="modal-close-btn" aria-label="Close dialog">
-            <CloseIcon size={16} />
-          </button>
+    <Modal isOpen={isOpen} onClose={onClose} labelledBy="upload-modal-title">
+      {/* Modal Header */}
+      <div className="modal-header">
+        <div className="modal-title-group">
+          <DocumentIcon size={18} />
+          <h2 id="upload-modal-title">UPLOAD OR PASTE CUSTOM CONTRACT FOR AUDIT</h2>
         </div>
+        <button type="button" onClick={onClose} className="modal-close-btn" aria-label="Close dialog">
+          <CloseIcon size={16} />
+        </button>
+      </div>
 
-        {/* Modal Content */}
-        <form onSubmit={handleSubmit} className="modal-body">
-          <p className="modal-intro">
-            CounterDraft parses contract text locally in your browser. No confidential document text is stored on external model training databases.
-          </p>
+      {/* Modal Content */}
+      <form onSubmit={handleSubmit} className="modal-body">
+        <p className="modal-intro">
+          Clauses are segmented locally in your browser. With GenAI analysis enabled, the clause text is sent to Google Gemini through our server to generate plain-language explanations, risk ratings, and redlines. Nothing is stored by CounterDraft. Remove names, addresses, and account numbers before submitting.
+        </p>
 
-          <div className="form-row-grid">
-            <div className="form-group">
-              <label htmlFor="custom-title" className="field-label">
-                CONTRACT TITLE:
-              </label>
-              <input
-                id="custom-title"
-                type="text"
-                value={docTitle}
-                onChange={(e) => setDocTitle(e.target.value)}
-                placeholder="e.g. Commercial Office Lease / Freelance Contract"
-                className="styled-search-input"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="custom-type" className="field-label">
-                DOCUMENT CLASSIFICATION:
-              </label>
-              <select
-                id="custom-type"
-                value={docType}
-                onChange={(e) => setDocType(e.target.value)}
-                className="styled-select"
-              >
-                <option value="Residential Lease">Residential Lease Agreement</option>
-                <option value="Commercial Agreement">Commercial Agreement / Services</option>
-                <option value="Employment Agreement">Employment & Executive Contract</option>
-                <option value="Non-Disclosure Agreement">Non-Disclosure Agreement (NDA)</option>
-                <option value="Terms of Service">Digital Terms of Service / Policy</option>
-                <option value="Other Agreement">Other Legal Contract</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="sample-buttons-strip">
-            <span className="sample-label">Or load standard demonstration template:</span>
-            <button
-              type="button"
-              onClick={() => handleLoadSample('nda')}
-              className="sample-pill-btn"
-            >
-              Load Commercial NDA Template
-            </button>
-            <button
-              type="button"
-              onClick={() => handleLoadSample('consultancy')}
-              className="sample-pill-btn"
-            >
-              Load Consultancy Agreement Template
-            </button>
-          </div>
-
+        <div className="form-row-grid">
           <div className="form-group">
-            <div className="textarea-label-row">
-              <label htmlFor="raw-contract-text" className="field-label">
-                CONTRACT TEXT (PASTE VERBATIM TEXT OR UPLOAD FILE):
-              </label>
-              <label className="file-upload-label">
-                <span>Select .txt / .doc file</span>
-                <input
-                  type="file"
-                  accept=".txt,.doc,.docx,.json"
-                  onChange={handleFileUpload}
-                  style={{ display: 'none' }}
-                />
-              </label>
-            </div>
-
-            <textarea
-              id="raw-contract-text"
-              rows={12}
-              value={rawText}
-              onChange={(e) => {
-                setRawText(e.target.value);
-                setErrorMsg('');
-              }}
-              placeholder="Paste contract sections, clauses, or full text here (e.g. Section 1. Term... Section 2. Liability...)..."
-              className="styled-textarea"
+            <label htmlFor="custom-title" className="field-label">
+              CONTRACT TITLE:
+            </label>
+            <input
+              id="custom-title"
+              type="text"
+              value={docTitle}
+              onChange={(e) => setDocTitle(e.target.value)}
+              placeholder="e.g. Commercial Office Lease / Freelance Contract"
+              className="styled-search-input"
             />
           </div>
 
-          {errorMsg && <div className="form-error-banner">{errorMsg}</div>}
-
-          <div className="modal-actions-bar">
-            <button type="button" onClick={onClose} className="action-btn-secondary">
-              Cancel
-            </button>
-            <button type="submit" className="action-btn-primary">
-              <DocumentIcon size={14} />
-              <span>Analyze & Ingest Docket</span>
-            </button>
+          <div className="form-group">
+            <label htmlFor="custom-type" className="field-label">
+              DOCUMENT CLASSIFICATION:
+            </label>
+            <select
+              id="custom-type"
+              value={docType}
+              onChange={(e) => setDocType(e.target.value)}
+              className="styled-select"
+            >
+              <option value="Residential Lease">Residential Lease Agreement</option>
+              <option value="Commercial Agreement">Commercial Agreement / Services</option>
+              <option value="Employment Agreement">Employment & Executive Contract</option>
+              <option value="Non-Disclosure Agreement">Non-Disclosure Agreement (NDA)</option>
+              <option value="Terms of Service">Digital Terms of Service / Policy</option>
+              <option value="Other Agreement">Other Legal Contract</option>
+            </select>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+
+        <div className="sample-buttons-strip">
+          <span className="sample-label">Or load standard demonstration template:</span>
+          <button
+            type="button"
+            onClick={() => handleLoadSample('nda')}
+            className="sample-pill-btn"
+          >
+            Load Commercial NDA Template
+          </button>
+          <button
+            type="button"
+            onClick={() => handleLoadSample('consultancy')}
+            className="sample-pill-btn"
+          >
+            Load Consultancy Agreement Template
+          </button>
+        </div>
+
+        <div className="form-group">
+          <div className="textarea-label-row">
+            <label htmlFor="raw-contract-text" className="field-label">
+              CONTRACT TEXT (PASTE VERBATIM TEXT OR UPLOAD FILE):
+            </label>
+            <label className="file-upload-label">
+              <span>Select .txt / .md file</span>
+              <input
+                type="file"
+                accept=".txt,.md,.text,text/plain,text/markdown"
+                onChange={handleFileUpload}
+                className="visually-hidden"
+              />
+            </label>
+          </div>
+
+          <textarea
+            id="raw-contract-text"
+            rows={12}
+            value={rawText}
+            onChange={(e) => {
+              setRawText(e.target.value);
+              setErrorMsg('');
+            }}
+            placeholder="Paste contract sections, clauses, or full text here (e.g. Section 1. Term... Section 2. Liability...)..."
+            className="styled-textarea"
+          />
+        </div>
+
+        <label className="genai-consent-row">
+          <input
+            type="checkbox"
+            checked={useGenAI}
+            onChange={(e) => setUseGenAI(e.target.checked)}
+            className="styled-checkbox"
+          />
+          <span>
+            <strong>Analyse with Google Gemini (GenAI).</strong> Untick to use only the offline statutory rule engine; no text leaves your browser.
+          </span>
+        </label>
+
+        {errorMsg && <div className="form-error-banner" role="alert">{errorMsg}</div>}
+
+        <div className="modal-actions-bar">
+          <button type="button" onClick={onClose} className="action-btn-secondary">
+            Cancel
+          </button>
+          <button type="submit" className="action-btn-primary" disabled={isAnalyzing} aria-busy={isAnalyzing}>
+            <DocumentIcon size={14} />
+            <span>{isAnalyzing ? 'Gemini is reading your contract…' : 'Analyze & Ingest Docket'}</span>
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 };

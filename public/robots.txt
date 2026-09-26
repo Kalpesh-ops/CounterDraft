@@ -1,5 +1,5 @@
 # CounterDraft Legal Intelligence & Clause Negotiation Engine
-# https://counterdraft.legal
+# https://counterdraft-app.vercel.app
 # Robots.txt configuration adhering to the Robot Exclusion Standard
 
 User-agent: *
@@ -41,8 +41,8 @@ User-agent: CCBot
 Allow: /
 
 # Sitemap Index
-Sitemap: https://counterdraft.legal/sitemap.xml
+Sitemap: https://counterdraft-app.vercel.app/sitemap.xml
 
 # LLM Context Manifest
 # See https://llmstxt.org for specifications
-# LLMs-Text: https://counterdraft.legal/llms.txt
+# LLMs-Text: https://counterdraft-app.vercel.app/llms.txt

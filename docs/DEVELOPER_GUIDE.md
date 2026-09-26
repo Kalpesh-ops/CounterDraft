@@ -99,7 +99,7 @@ CounterDraft's visual identity reflects a classical, authoritative legal publish
 | **26** | Placeholder TOS or Privacy Policy | Real, comprehensive statutory disclaimers. |
 | **27** | Hover scale transforms (`scale(1.05)`) | Instant underline or background tone shifts. |
 | **28** | Basic pastel colors | Deep mineral tones (crimson, amber, olive, ink). |
-| **29** | External analytics / telemetry scripts | Zero external tracking; 100% client-side privacy. |
+| **29** | External analytics / telemetry scripts | Zero external tracking; GenAI calls only through the same-origin `/api/genai` gateway. |
 | **30** | Unescaped HTML rendering | React JSX text escaping; zero `dangerouslySetInnerHTML`. |
 
 ---

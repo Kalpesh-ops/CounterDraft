@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { LegalDocument } from '../types/legal';
 import { generateCounselBrief } from '../services/legalEngine';
 import { sanitizeInput, safeCopyToClipboard } from '../utils/security';
@@ -12,7 +12,8 @@ export const CounselBriefGenerator: React.FC<CounselBriefGeneratorProps> = ({ do
   const [clientName, setClientName] = useState<string>('Client Signatory');
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
-  const brief = generateCounselBrief(document, sanitizeInput(clientName) || 'Client Signatory');
+  const cleanClientName = sanitizeInput(clientName) || 'Client Signatory';
+  const brief = useMemo(() => generateCounselBrief(document, cleanClientName), [document, cleanClientName]);
 
   const handlePrintOrDownload = () => {
     window.print();

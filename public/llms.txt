@@ -1,20 +1,20 @@
-# CounterDraft Legal Intelligence & Clause Negotiation Engine
+# CounterDraft: GenAI Legal Assistant for Contracts
 
-> CounterDraft is a privacy-first, client-side legal intelligence platform that demystifies complex contracts, audits asymmetric clause liabilities, performs side-by-side contract diffing, and generates statutory redlines and advocate briefs grounded in Indian statutory law and landmark Supreme Court precedents.
+> CounterDraft is a GenAI legal assistant powered by Google Gemini that simplifies complex contracts (in 8 Indian languages), audits clause risks, answers questions with verified quotes from the contract, compares agreements, and prepares advocate briefs, all grounded in Indian statutory law and landmark Supreme Court precedents.
 
 ## Overview
 
-CounterDraft addresses the systemic asymmetry between institutional contract drafters and prospective signatories (tenants, employees, consultants, and MSME vendors). The platform operates on a 100% local-first, zero-cloud-retention model where documents are parsed and evaluated entirely within the client's browser session.
+CounterDraft addresses the systemic asymmetry between institutional contract drafters and prospective signatories (tenants, employees, consultants, and MSME vendors). Contracts are segmented in the browser; Google Gemini (via a server-side gateway that verifies quotes and citations) produces explanations and answers, with an offline statutory rule engine as fallback. No documents are stored.
 
 ## Core Capabilities
 
-- [Clause Risk Auditor](https://counterdraft.legal/#auditor): Identifies high-risk provisions (unilateral termination, unliquidated damages, post-tenure non-competes, one-sided indemnities) and produces 1-click statutory redline counter-proposals.
-- [Side-by-Side Contract Comparator](https://counterdraft.legal/#comparator): Analyzes linguistic deviations between baseline drafts and counterparty markups, flagging favorability shifts and newly inserted liabilities.
-- [Negotiation Playbook](https://counterdraft.legal/#playbook): Calculates concrete financial exposure (deposit confiscation, lock-in salary exposure, compounding daily penalties) and compiles professional negotiation correspondence ready to transmit to landlords, employers, or corporate counterparties.
-- [Judicial Precedent Navigator](https://counterdraft.legal/#precedents): Comprehensive legal authority repository linking contract clauses directly to binding Supreme Court and High Court rulings.
-- [Grounded Document Q&A](https://counterdraft.legal/#qa): Answers natural language legal inquiries with verbatim anchored citations from the ingested contract combined with statutory override notes.
-- [Counsel Brief Generator](https://counterdraft.legal/#counsel): Generates an editorial 1-page printable legal memorandum organizing high-priority risks, statutory defenses, missing safeguards, and tailored interrogation questions for an advocate consultation.
-- [Actionable Safeguard Checklist](https://counterdraft.legal/#checklist): Structured milestone checklist organizing pre-signing verifications, active tenure record-keeping, and exit notices with plain-text compliance export.
+- [Clause Risk Auditor](https://counterdraft-app.vercel.app/#auditor): Identifies high-risk provisions (unilateral termination, unliquidated damages, post-tenure non-competes, one-sided indemnities) and produces 1-click statutory redline counter-proposals.
+- [Side-by-Side Contract Comparator](https://counterdraft-app.vercel.app/#comparator): Analyzes linguistic deviations between baseline drafts and counterparty markups, flagging favorability shifts and newly inserted liabilities.
+- [Negotiation Playbook](https://counterdraft-app.vercel.app/#playbook): Calculates concrete financial exposure (deposit confiscation, lock-in salary exposure, compounding daily penalties) and compiles professional negotiation correspondence ready to transmit to landlords, employers, or corporate counterparties.
+- [Judicial Precedent Navigator](https://counterdraft-app.vercel.app/#precedents): Comprehensive legal authority repository linking contract clauses directly to binding Supreme Court and High Court rulings.
+- [Grounded Document Q&A](https://counterdraft-app.vercel.app/#qa): Answers natural language legal inquiries with verbatim anchored citations from the ingested contract combined with statutory override notes.
+- [Counsel Brief Generator](https://counterdraft-app.vercel.app/#counsel): Generates an editorial 1-page printable legal memorandum organizing high-priority risks, statutory defenses, missing safeguards, and tailored interrogation questions for an advocate consultation.
+- [Actionable Safeguard Checklist](https://counterdraft-app.vercel.app/#checklist): Structured milestone checklist organizing pre-signing verifications, active tenure record-keeping, and exit notices with plain-text compliance export.
 
 ## Statutory Foundations
 
@@ -38,7 +38,7 @@ CounterDraft evaluates contractual enforceability against statutory benchmarks u
 
 ## Privacy & Security Architecture
 
-- **Zero Server Retention**: No contract text, user queries, or briefs are ever transmitted to or stored on external servers or databases.
+- **Zero Server Retention**: No contract text, user queries, or briefs are stored. Text is sent to Google Gemini only when GenAI features are used, and users can opt out.
 - **No Third-Party Telemetry**: Zero external tracking, analytics scripts, or cookies.
 - **Input Sanitization**: Multi-layer sanitization neutralizes HTML markup, script vectors, and prototype pollution keys.
 - **Content Security Policy**: Strict CSP with default-src 'self', frame-ancestors 'none', and no external script execution.
@@ -48,4 +48,4 @@ CounterDraft evaluates contractual enforceability against statutory benchmarks u
 - **Type**: Single Page Web Application (SPA)
 - **Technology**: React 19, TypeScript, Vite
 - **Repository / Source**: https://github.com/Kalpesh-ops/CounterDraft
-- **Documentation**: https://counterdraft.legal/llms-full.txt
+- **Documentation**: https://counterdraft-app.vercel.app/llms-full.txt

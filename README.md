@@ -1,82 +1,99 @@
-# CounterDraft | Legal Intelligence & Clause Negotiation Engine
+# CounterDraft | GenAI Legal Assistant for Contracts
 
-> **Accessible, privacy-first legal document intelligence, clause risk auditing, side-by-side contract comparison, and statutory counter-proposal drafts grounded in Indian statutory law and landmark Supreme Court jurisprudence.**
+> **A GenAI-powered legal assistant, built on Google Gemini, that helps non-lawyers understand, compare, and negotiate contracts. It simplifies clauses in plain language (in 8 Indian languages), flags risks, answers questions with verified quotes from the contract, and prepares a brief for an advocate. Every AI output is grounded in the user's document and in Indian statute and precedent.**
 
 [![CI/CD Pipeline](https://github.com/Kalpesh-ops/CounterDraft/actions/workflows/ci.yml/badge.svg)](https://github.com/Kalpesh-ops/CounterDraft/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Zero Cloud Retention](https://img.shields.io/badge/Privacy-Zero_Cloud_Retention-2d4a22.svg)](#privacy--zero-server-model)
-[![Tests Passing](https://img.shields.io/badge/Tests-32%20passing-brightgreen.svg)](#testing)
+[![GenAI: Google Gemini](https://img.shields.io/badge/GenAI-Google_Gemini-1a73e8.svg)](#2-approach-grounded-genai)
+[![Tests Passing](https://img.shields.io/badge/Tests-51%20passing-brightgreen.svg)](#testing)
 
 ---
 
 ## Submission Information
 
 - **Project Name**: CounterDraft
-- **Chosen Challenge Vertical**: Legal Information & Basic Legal Assistance Accessibility
+- **Chosen Challenge Vertical**: AI for Legal Assistance & Access
 - **Repository Visibility**: Public GitHub Repository
 - **Repository Branch Count**: Exactly 1 branch (`main`)
-- **Repository Size**: ~395 KiB (Strictly compliant with `< 10 MB` ceiling)
 - **Live Application**: [https://counterdraft-app.vercel.app](https://counterdraft-app.vercel.app/)
 - **Mirror Domain**: [https://counterdraft-legal.vercel.app](https://counterdraft-legal.vercel.app/)
-- **Deployment Platform**: Vercel (Edge-cached, zero-cloud retention client-side architecture)
+- **Deployment Platform**: Vercel (static SPA + one serverless function, `/api/genai`, that calls Google Gemini)
+- **GenAI Model**: Google Gemini (`gemini-3.5-flash` by default, configurable via `GEMINI_MODEL`)
 
 ---
 
-## 1. Chosen Vertical & Challenge Alignment
+## 1. Problem & Challenge Alignment
 
-Legal information is structurally complex, terminology-dense, and notoriously difficult for non-lawyers to navigate without expensive legal representation. Individual signatories—such as residential tenants, tech employees, independent consultants, and MSME vendors—frequently sign standardized adhesion contracts containing unilateral termination powers, illegal security deposit forfeitures, uncapped indemnities, and void non-competes.
+Legal information is complex, full of jargon, and hard to navigate without paying for a lawyer. Tenants, employees, freelancers, and small businesses routinely sign one-sided contracts containing illegal deposit forfeitures, void non-competes, uncapped indemnities, and unilateral termination rights, without understanding them.
 
-**CounterDraft** is engineered specifically for the **Legal Information & Basic Legal Assistance Accessibility** vertical. It demystifies opaque legal drafting, evaluates clause enforceability against codified Indian statutes and landmark Supreme Court precedents, and equips signatories with actionable, balanced counter-drafts and advocate briefing memoranda before signing.
+**CounterDraft is a GenAI-powered solution for the "AI for Legal Assistance & Access" challenge.** It uses Google Gemini to explain, analyse, and answer questions about a user's own contract, and it keeps the model honest by grounding it in the document and in a curated corpus of Indian statutes and Supreme Court precedents. It provides information and assistance, not legal advice, and it ends every journey by helping the user prepare for a real advocate.
+
+### How each suggested use case is covered
+
+| Challenge use case | CounterDraft feature | GenAI role |
+|---|---|---|
+| Simplifying complex legal documents | **Explain Simply** on every clause, in English, Hindi, Bengali, Marathi, Tamil, Telugu, Kannada, or Gujarati; plain-terms summary for every clause | Gemini rewrites each clause at a ~12-year-old reading level, with key points, the biggest risk, and questions to ask |
+| Comparing contracts, agreements, or policies | **Contract Comparator & Redline**: clause-by-clause diff with favourability shift | Statutory engine scores each deviation for the user |
+| Highlighting important clauses, obligations, risks, or inconsistencies | **Clause Risk Auditor**: high/caution/standard/favourable ratings, rationale, statute, and precedent for every clause | Gemini analyses every uploaded clause, extracts obligations, and writes a balanced counter-proposal |
+| Answering questions based on provided legal documents | **Ask Gemini: Grounded Q&A** | Gemini answers only from the contract; quotes are verified verbatim server-side and unverifiable ones are dropped |
+| Helping users understand their options and next steps | **Your Next Steps** on the audit summary, **Negotiation Playbook** with a ready-to-send email | Gemini generates 3-5 practical next steps, including when to see an advocate |
+| Generating summaries, checklists, or other actionable outputs | Executive summary, **Compliance Checklist** (pre-signing / active term / exit) with `.txt` export | Gemini's extracted obligations become checklist items |
+| Helping users prepare questions for a legal professional | **Lawyer Consultation Brief**: printable 1-page memo with prioritised risks and questions | Built from the (AI-enriched) audit |
 
 ---
 
-## 2. Approach and Logic
+## 2. Approach: Grounded GenAI
 
-1. **Deterministic Statutory Grounding vs. Black-Box Hallucination**:
-   Rather than piping unvetted contract text into an unconstrained system prompt that risks hallucinating non-existent statutory citations or yielding to adversarial prompt injection, CounterDraft pairs algorithmic document segmentation with codified legal principles (*Indian Contract Act, 1872* and *Transfer of Property Act, 1882*) and binding Supreme Court rulings (*Percept D'Mark*, *Kailash Nath Associates*, *Central Inland Water Transport*).
-2. **Asymmetry Rebalancing Engine**:
-   Every flagged high-risk clause automatically generates a reciprocal, legally grounded **redline counter-proposal** that can be immediately copied into an ongoing negotiation.
-3. **Local-First Zero-Cloud-Retention Architecture**:
-   To guarantee absolute client confidentiality, 100% of document ingestion, parsing, comparison, and brief compilation execute client-side in browser memory. No confidential contract data is transmitted to or stored on external servers.
-4. **ReDoS-Immune Linear Processing**:
-   All text segmentation and keyword matching algorithms operate with bounded, non-overlapping linear time complexity $O(N)$, ensuring zero Regular Expression Denial of Service vulnerabilities even on massive 1 MB contract payloads.
+Pure LLM legal tools hallucinate citations and can be steered by text hidden inside a contract. Pure rule engines are safe but rigid. CounterDraft combines the two:
+
+1. **Deterministic segmentation first.** The contract is split into clauses in the browser. The verbatim clause text is never rewritten by the model, so what the user reads as "the contract" is always the real contract.
+2. **Gemini for understanding.** The clauses are sent to Google Gemini (through a server function that holds the API key) to produce plain-language explanations, risk ratings, rationale, obligations, counter-proposals, next steps, and grounded answers.
+3. **Verification after generation.** The server checks every model output before it reaches the user:
+   - Q&A quotes must appear **verbatim** in the cited clause, or they are discarded (the UI says how many were removed).
+   - Case citations must match the **curated precedent corpus** (*Percept D'Mark*, *Kailash Nath*, *Brojo Nath Ganguly*, and others), or they are dropped.
+   - Clause numbers, risk levels, and categories are validated against the input and allowed values.
+4. **Prompt-injection defence.** Contract text and questions are fenced as untrusted data, closing tags inside user text are neutralised, and the system instruction forbids following embedded instructions.
+5. **Graceful degradation.** If Gemini is unavailable, rate-limited, or switched off by the user, every feature falls back to the offline statutory rule engine (Indian Contract Act, 1872; Transfer of Property Act, 1882), and the UI labels which engine produced each result.
+6. **Transparent provenance.** Each audit and answer carries a badge: *Gemini GenAI · grounded*, *Statutory rule engine*, or *Curated expert analysis* (for the bundled sample contracts).
 
 ---
 
 ## 3. How the Solution Works
 
 ```
-[ User Input: File / Text ]
-          │
-          ▼
-[ Security & Sanitization Layer ] ──► Size Cap (2 MB) & Script Neutralizer
-          │
-          ▼
-[ Clause Segmentation Parser ] ──► Regex Boundary & Paragraph Chunking
-          │
-          ▼
-[ Statutory Rule Evaluator ] ──► ICA 1872 / TPA 1882 Heuristic Matching
-          │
-          ├─────────────────────────────────────────────────┐
-          ▼                                                 ▼
-[ Multi-Module Output Pipeline ]               [ Quantified Risk Engine ]
-  • Clause Risk Auditor                          • Composite Risk Score (0-95)
-  • Side-by-Side Diff Comparator                 • Deposit at Risk Metric
-  • Negotiation Letter Generator                 • Daily Delay Penalties
-  • Grounded Q&A Inquiries                       • Lock-in Period Liabilities
-  • Precedent Case Law Index                     • Net Favorability Shift
-  • Counsel Consultation Brief
-  • Actionable Safeguard Checklist
+[ User: paste / upload .txt or .md ]
+          |
+          v
+[ Browser: sanitisation & size caps ] --> 2 MB file cap, control-char & script stripping
+          |
+          v
+[ Browser: clause segmentation ] --> verbatim clauses (never rewritten)
+          |                                   |
+          |  GenAI on (default, with consent) |  GenAI off / unavailable
+          v                                   v
+[ POST /api/genai  (Vercel Function) ]   [ Offline statutory rule engine ]
+  - schema & size validation, rate limit   - ICA 1872 / TPA 1882 heuristics
+  - injection-fenced prompt -> Google Gemini
+  - verify quotes & precedents, clamp enums
+          |                                   |
+          +---------------+-------------------+
+                          v
+[ Workspaces ]
+  - Clause Risk Auditor + Explain Simply (8 languages)   - Ask Gemini: Grounded Q&A
+  - Negotiation Playbook & exposure maths                 - Contract Comparator
+  - Compliance Checklist (incl. extracted obligations)    - Precedent Navigator
+  - Lawyer Consultation Brief (print-ready)
 ```
 
 ---
 
 ## 4. Key Assumptions Made
 
-1. **Jurisdiction & Legal Framework**: Grounded primarily in Indian statutory law (*Indian Contract Act, 1872*, *Transfer of Property Act, 1882*, and Supreme Court appellate jurisprudence), which forms the core benchmark for commercial and civil contracting across India. The underlying principles of unconscionability, direct damage causality, and bilateral reciprocity remain structurally relevant across common-law jurisdictions.
-2. **Language**: Designed for English-language legal agreements, which represent the universal standard for corporate, tenancy, employment, and commercial contracts in India.
-3. **Informational & Assistive Mandate**: Assumes the role of an intelligent informational assistant. CounterDraft explicitly disclaims formal legal representation and provides users with a structured Counsel Brief to maximize the efficiency and value of subsequent consultations with enrolled advocates.
-4. **Client Environment**: Assumes modern web standards supporting HTML5, ES2022 JavaScript, Web Cryptography/Clipboard APIs, and local File API.
+1. **Jurisdiction**: Indian contract law (*Indian Contract Act, 1872*, *Transfer of Property Act, 1882*, *Specific Relief Act, 1963*, and Supreme Court precedent).
+2. **Language**: Contracts are assumed to be in English (the norm for Indian commercial, tenancy, and employment agreements); explanations can be generated in 8 Indian languages.
+3. **Informational mandate**: CounterDraft informs and assists; it does not give legal advice or create an attorney-client relationship, and it directs users to an enrolled advocate.
+4. **Input format**: Plain text (`.txt`, `.md`) or pasted text. Word and PDF files should be copied and pasted, since binary formats cannot be read faithfully in the browser.
+5. **GenAI availability**: A `GEMINI_API_KEY` is configured on the server. Without it the app still works using the offline rule engine.
 
 ---
 
@@ -88,7 +105,8 @@ Legal information is structurally complex, terminology-dense, and notoriously di
 | **[Side-by-Side Comparator](docs/USER_MANUAL.md#step-3-side-by-side-contract-comparator-comparator)** | Computes clause-by-clause diffs between baseline agreements and counterparty markups, quantifying net favorability shifts. | Contractual deviation and adhesion analysis |
 | **[Negotiation Playbook](docs/USER_MANUAL.md#step-4-negotiation-playbook--financial-exposure-playbook)** | Quantifies financial liabilities (deposit confiscation, lock-in wages, compounding penalties) and compiles a ready-to-send negotiation letter. | Supreme Court liquidated damages benchmark (*Kailash Nath*) |
 | **[Judicial Precedent Navigator](docs/STATUTORY_REFERENCE.md#3-landmark-judicial-authorities-digest)** | Curated repository of landmark appellate authorities (*Percept D'Mark*, *Kailash Nath*, *Brojo Nath Ganguly*, *Golikari*, *Vidya Drolia*). | Supreme Court of India jurisprudence |
-| **[Grounded Document Q&A](docs/USER_MANUAL.md#step-5-grounded-document-qa-qa)** | Anchored inquiry engine retrieving exact contract snippets synthesized with mandatory statutory rights and override notes. | Codified Indian statutory law |
+| **[Ask Gemini: Grounded Q&A](docs/USER_MANUAL.md#step-5-grounded-document-qa-qa)** | Google Gemini answers questions from the contract only, with verbatim quotes verified server-side, statutory rights notes, and follow-up questions. | Codified Indian statutory law + curated precedents |
+| **Explain Simply (GenAI)** | Plain-language explanation of any clause in 8 Indian languages, with key points, the main risk, and questions to ask. | Google Gemini, grounded in the clause text |
 | **[Counsel Brief Generator](docs/USER_MANUAL.md#step-7-counsel-brief-generator-counsel)** | Generates an editorial 1-page printable legal memorandum organizing high-priority risks and interrogation questions for an advocate consultation. | Dedicated print stylesheet (`@media print`) |
 | **[Actionable Safeguard Checklist](docs/USER_MANUAL.md#step-6-compliance--safeguard-checklist-checklist)** | Three-phase compliance tracker (Pre-Signing, Active Term, Exit/Termination) with `.txt` export. | Risk management best practices |
 
@@ -99,7 +117,7 @@ Legal information is structurally complex, terminology-dense, and notoriously di
 The project includes an exhaustive technical and legal documentation suite:
 
 ### Developer & Technical Documentation
-- **[System Architecture](docs/ARCHITECTURE.md)**: Zero-server privacy model, data flow pipeline, state management, and memory safety boundaries.
+- **[System Architecture](docs/ARCHITECTURE.md)**: Grounded GenAI pipeline, the `/api/genai` gateway, data flow, state management, and memory safety boundaries.
 - **[Developer Guide](docs/DEVELOPER_GUIDE.md)**: Local setup, Vitest test execution, production build instructions, and the **30 Negative Design Constraints**.
 - **[Legal Engine Specification](docs/LEGAL_ENGINE.md)**: Algorithmic parsing, ReDoS-safe linear regex heuristics, composite risk scoring mathematics, and financial exposure algorithms.
 - **[Security Audit & Threat Model](docs/SECURITY_AUDIT.md)**: XSS/Clickjacking mitigations, memory bomb file boundaries, CSP headers, and clipboard fallback routines.
@@ -132,8 +150,9 @@ CounterDraft implements modern web discovery and AI agent context protocols in t
 ## Quickstart & Local Development
 
 ### Prerequisites
-- Node.js v18.0.0 or higher
-- npm v9.0.0 or higher
+- Node.js v20 or higher (CI runs Node 22)
+- npm v9 or higher
+- A Google Gemini API key (optional: without it the app uses the offline rule engine)
 
 ```bash
 # Clone the repository
@@ -143,7 +162,10 @@ cd CounterDraft
 # Install dependencies
 npm install
 
-# Start local development server with Vite HMR
+# Configure Google Gemini (get a key at https://aistudio.google.com/apikey)
+cp .env.example .env.local   # then set GEMINI_API_KEY
+
+# Start local development server (also serves POST /api/genai)
 npm run dev
 
 # Run Vitest test suite
@@ -153,14 +175,25 @@ npm test -- --run
 npm run build
 ```
 
+### Deploying to Vercel
+
+1. Import the repository in Vercel (framework preset: Vite).
+2. Add the environment variable `GEMINI_API_KEY` (and optionally `GEMINI_MODEL`) under **Settings > Environment Variables**.
+3. Deploy. The static app and the `/api/genai` function deploy together; the key never reaches the browser.
+
+### Testing
+
+`npm test` runs 51 Vitest tests covering the statutory engine, input sanitisation, the GenAI gateway (validation, prompt-injection fencing, quote and precedent verification, HTTP handling, and rate limiting, with Gemini mocked), the GenAI client merge and fallback logic, and UI navigation.
+
 ---
 
-## Privacy & Zero-Server Model
+## Privacy & Data Handling
 
-CounterDraft guarantees absolute document confidentiality:
-- **Zero Cloud Persistence**: Contracts never leave your browser; no backend databases, telemetry trackers, or external logging.
-- **Zero Web Storage**: `localStorage` and `sessionStorage` are untouched to prevent script scraping.
-- **Strict Content Security Policy**: Network egress is restricted via `connect-src 'self'`.
+- **No document database**: CounterDraft never stores contracts, questions, or outputs. There is no telemetry or analytics.
+- **User choice**: Clause text goes to Google Gemini only when GenAI features are used. Users can untick GenAI at upload to keep all processing in the browser.
+- **Key isolation**: The Gemini API key lives only in the server environment; the browser talks to `/api/genai` on the same origin (`connect-src 'self'`).
+- **Honest disclosure**: On the Gemini API free tier, Google may use submitted content to improve its products. The in-app privacy policy says so and advises removing names, addresses, and account numbers.
+- **Zero web storage**: `localStorage` and `sessionStorage` are not used.
 
 ## Community Standards & Repository Governance
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { courtPrecedents } from '../data/courtPrecedents';
 import type { CourtPrecedent } from '../types/legal';
 import { GavelIcon, SearchIcon, BookOpenIcon, FilterIcon } from './Icons';
@@ -8,21 +8,23 @@ export const PrecedentNavigator: React.FC = () => {
   const [selectedStatute, setSelectedStatute] = useState<string>('all');
   const [activePrecedentId, setActivePrecedentId] = useState<string>(courtPrecedents[0].id);
 
-  const filteredPrecedents = courtPrecedents.filter((item: CourtPrecedent) => {
-    const matchesSearch =
-      searchTerm === '' ||
-      item.caseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.citation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.coreDoctrine.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.rulingSummary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.keywords.some((k) => k.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredPrecedents = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    const statute = selectedStatute.toLowerCase();
+    return courtPrecedents.filter((item: CourtPrecedent) => {
+      const matchesSearch =
+        term === '' ||
+        item.caseName.toLowerCase().includes(term) ||
+        item.citation.toLowerCase().includes(term) ||
+        item.coreDoctrine.toLowerCase().includes(term) ||
+        item.rulingSummary.toLowerCase().includes(term) ||
+        item.keywords.some((k) => k.toLowerCase().includes(term));
 
-    const matchesStatute =
-      selectedStatute === 'all' ||
-      item.statutorySection.toLowerCase().includes(selectedStatute.toLowerCase());
+      const matchesStatute = statute === 'all' || item.statutorySection.toLowerCase().includes(statute);
 
-    return matchesSearch && matchesStatute;
-  });
+      return matchesSearch && matchesStatute;
+    });
+  }, [searchTerm, selectedStatute]);
 
   const activePrecedent = courtPrecedents.find((p) => p.id === activePrecedentId) || courtPrecedents[0];
 

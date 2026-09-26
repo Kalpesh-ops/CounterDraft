@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { ComparisonPair, ComparisonDiff } from '../types/legal';
 import { sampleComparisonPairs } from '../data/sampleContracts';
 import { parseCustomContract, compareCustomDocuments } from '../services/legalEngine';
 import { validateContractPayload } from '../utils/security';
 import { CompareIcon, ShieldAlertIcon, PlusIcon, CloseIcon, DocumentIcon } from './Icons';
+import { Modal } from './Modal';
 
 interface ContractComparatorProps {
   customPair?: ComparisonPair | null;
@@ -26,10 +27,16 @@ export const ContractComparator: React.FC<ContractComparatorProps> = ({ customPa
 
   const currentPair = pairsList.find((p) => p.id === selectedPairId) || pairsList[0];
 
-  const filteredDiffs = currentPair.diffs.filter((diff) => {
-    if (activeDiffFilter === 'all') return true;
-    return diff.riskImpact === activeDiffFilter;
-  });
+  const filteredDiffs = useMemo(
+    () => (activeDiffFilter === 'all' ? currentPair.diffs : currentPair.diffs.filter((diff) => diff.riskImpact === activeDiffFilter)),
+    [currentPair.diffs, activeDiffFilter]
+  );
+
+  const impactCounts = useMemo(() => {
+    const counts = { worse_for_user: 0, neutral: 0, better_for_user: 0 };
+    for (const diff of currentPair.diffs) counts[diff.riskImpact] += 1;
+    return counts;
+  }, [currentPair.diffs]);
 
   const handleCreateCustomComparison = (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,19 +150,19 @@ Consultant shall indemnify and hold harmless Client for any third-party claims. 
             <div className="risk-metrics-row">
               <div className="metric-pill pill-high">
                 <span className="metric-num">
-                  {currentPair.diffs.filter(d => d.riskImpact === 'worse_for_user').length}
+                  {impactCounts.worse_for_user}
                 </span>
                 <span className="metric-name">Worse for Signatory</span>
               </div>
               <div className="metric-pill pill-standard">
                 <span className="metric-num">
-                  {currentPair.diffs.filter(d => d.riskImpact === 'neutral').length}
+                  {impactCounts.neutral}
                 </span>
                 <span className="metric-name">Neutral / Procedural</span>
               </div>
               <div className="metric-pill pill-favorable">
                 <span className="metric-num">
-                  {currentPair.diffs.filter(d => d.riskImpact === 'better_for_user').length}
+                  {impactCounts.better_for_user}
                 </span>
                 <span className="metric-name">Better for Signatory</span>
               </div>
@@ -189,14 +196,14 @@ Consultant shall indemnify and hold harmless Client for any third-party claims. 
               className={`filter-btn btn-filter-high ${activeDiffFilter === 'worse_for_user' ? 'active' : ''}`}
               onClick={() => setActiveDiffFilter('worse_for_user')}
             >
-              Unfavorable Shifts ({currentPair.diffs.filter(d => d.riskImpact === 'worse_for_user').length})
+              Unfavorable Shifts ({impactCounts.worse_for_user})
             </button>
             <button
               type="button"
               className={`filter-btn btn-filter-standard ${activeDiffFilter === 'neutral' ? 'active' : ''}`}
               onClick={() => setActiveDiffFilter('neutral')}
             >
-              Neutral ({currentPair.diffs.filter(d => d.riskImpact === 'neutral').length})
+              Neutral ({impactCounts.neutral})
             </button>
           </div>
         </div>
@@ -269,119 +276,114 @@ Consultant shall indemnify and hold harmless Client for any third-party claims. 
       </div>
 
       {/* Custom Pair Comparison Modal */}
-      {isCustomModalOpen && (
-        <div className="modal-backdrop" onClick={() => setIsCustomModalOpen(false)}>
-          <div
-            className="modal-folio modal-folio-large"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="custom-compare-title"
-            onClick={(e) => e.stopPropagation()}
+      <Modal
+        isOpen={isCustomModalOpen}
+        onClose={() => setIsCustomModalOpen(false)}
+        labelledBy="custom-compare-title"
+        className="modal-folio-large"
+      >
+        <div className="modal-header">
+          <div className="modal-title-group">
+            <CompareIcon size={18} />
+            <h2 id="custom-compare-title">COMPARE ANY TWO CUSTOM CONTRACTS</h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsCustomModalOpen(false)}
+            className="modal-close-btn"
+            aria-label="Close dialog"
           >
-            <div className="modal-header">
-              <div className="modal-title-group">
-                <CompareIcon size={18} />
-                <h2 id="custom-compare-title">COMPARE ANY TWO CUSTOM CONTRACTS</h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsCustomModalOpen(false)}
-                className="modal-close-btn"
-                aria-label="Close dialog"
-              >
-                <CloseIcon size={16} />
-              </button>
+            <CloseIcon size={16} />
+          </button>
+        </div>
+
+        <form onSubmit={handleCreateCustomComparison} className="modal-body">
+          <div className="modal-intro">
+            Paste any two contract drafts (e.g. Original Draft vs Counterparty Redline) to generate a clause-by-clause deviation audit and favorability score.
+          </div>
+
+          <div className="sample-buttons-strip">
+            <span className="sample-label">Demonstration:</span>
+            <button
+              type="button"
+              onClick={handleLoadSampleComparison}
+              className="sample-pill-btn"
+            >
+              Load Freelance Contract vs Client Redline
+            </button>
+          </div>
+
+          <div className="split-diff-grid">
+            <div className="form-group">
+              <label htmlFor="doc-a-title" className="field-label">
+                DOCUMENT A TITLE (BASELINE):
+              </label>
+              <input
+                id="doc-a-title"
+                type="text"
+                value={docATitle}
+                onChange={(e) => setDocATitle(e.target.value)}
+                className="styled-search-input"
+              />
+              <label htmlFor="doc-a-text" className="field-label" style={{ marginTop: '8px' }}>
+                DOCUMENT A TEXT:
+              </label>
+              <textarea
+                id="doc-a-text"
+                rows={8}
+                value={docAText}
+                onChange={(e) => setDocAText(e.target.value)}
+                placeholder="Paste baseline agreement sections..."
+                className="styled-textarea"
+              />
             </div>
 
-            <form onSubmit={handleCreateCustomComparison} className="modal-body">
-              <div className="modal-intro">
-                Paste any two contract drafts (e.g. Original Draft vs Counterparty Redline) to generate a clause-by-clause deviation audit and favorability score.
-              </div>
-
-              <div className="sample-buttons-strip">
-                <span className="sample-label">Demonstration:</span>
-                <button
-                  type="button"
-                  onClick={handleLoadSampleComparison}
-                  className="sample-pill-btn"
-                >
-                  Load Freelance Contract vs Client Redline
-                </button>
-              </div>
-
-              <div className="split-diff-grid">
-                <div className="form-group">
-                  <label htmlFor="doc-a-title" className="field-label">
-                    DOCUMENT A TITLE (BASELINE):
-                  </label>
-                  <input
-                    id="doc-a-title"
-                    type="text"
-                    value={docATitle}
-                    onChange={(e) => setDocATitle(e.target.value)}
-                    className="styled-search-input"
-                  />
-                  <label htmlFor="doc-a-text" className="field-label" style={{ marginTop: '8px' }}>
-                    DOCUMENT A TEXT:
-                  </label>
-                  <textarea
-                    id="doc-a-text"
-                    rows={8}
-                    value={docAText}
-                    onChange={(e) => setDocAText(e.target.value)}
-                    placeholder="Paste baseline agreement sections..."
-                    className="styled-textarea"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="doc-b-title" className="field-label">
-                    DOCUMENT B TITLE (COUNTER-DRAFT):
-                  </label>
-                  <input
-                    id="doc-b-title"
-                    type="text"
-                    value={docBTitle}
-                    onChange={(e) => setDocBTitle(e.target.value)}
-                    className="styled-search-input"
-                  />
-                  <label htmlFor="doc-b-text" className="field-label" style={{ marginTop: '8px' }}>
-                    DOCUMENT B TEXT:
-                  </label>
-                  <textarea
-                    id="doc-b-text"
-                    rows={8}
-                    value={docBText}
-                    onChange={(e) => setDocBText(e.target.value)}
-                    placeholder="Paste counterparty revised sections..."
-                    className="styled-textarea"
-                  />
-                </div>
-              </div>
-
-              {comparisonError && <div className="form-error-banner">{comparisonError}</div>}
-
-              <div className="modal-actions-bar">
-                <button
-                  type="button"
-                  onClick={() => setIsCustomModalOpen(false)}
-                  className="action-btn-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={!docAText.trim() || !docBText.trim()}
-                  className="action-btn-primary"
-                >
-                  <DocumentIcon size={14} />
-                  <span>Execute Side-by-Side Comparison</span>
-                </button>
-              </div>
-            </form>
+            <div className="form-group">
+              <label htmlFor="doc-b-title" className="field-label">
+                DOCUMENT B TITLE (COUNTER-DRAFT):
+              </label>
+              <input
+                id="doc-b-title"
+                type="text"
+                value={docBTitle}
+                onChange={(e) => setDocBTitle(e.target.value)}
+                className="styled-search-input"
+              />
+              <label htmlFor="doc-b-text" className="field-label" style={{ marginTop: '8px' }}>
+                DOCUMENT B TEXT:
+              </label>
+              <textarea
+                id="doc-b-text"
+                rows={8}
+                value={docBText}
+                onChange={(e) => setDocBText(e.target.value)}
+                placeholder="Paste counterparty revised sections..."
+                className="styled-textarea"
+              />
+            </div>
           </div>
-        </div>
-      )}
+
+          {comparisonError && <div className="form-error-banner">{comparisonError}</div>}
+
+          <div className="modal-actions-bar">
+            <button
+              type="button"
+              onClick={() => setIsCustomModalOpen(false)}
+              className="action-btn-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!docAText.trim() || !docBText.trim()}
+              className="action-btn-primary"
+            >
+              <DocumentIcon size={14} />
+              <span>Execute Side-by-Side Comparison</span>
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

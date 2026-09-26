@@ -6,49 +6,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data: https:; object-src 'none'; base-uri 'self';" />
-    <title>CounterDraft | Legal Intelligence & Clause Negotiation Engine</title>
-    <meta name="description" content="Demystify complex contracts, audit clause liabilities, compare agreements side-by-side, and generate statutory redlines grounded in Indian law. 100% private, local-first." />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+    <title>CounterDraft | GenAI Legal Assistant for Contracts (Gemini)</title>
+    <meta name="description" content="GenAI legal assistant powered by Google Gemini. Simplify contracts, audit clause risks, compare agreements, ask grounded questions, and prepare for your advocate. Grounded in Indian law." />
     <meta name="keywords" content="legal tech, contract review, clause risk audit, contract comparison, statutory redline, Indian Contract Act 1872, Transfer of Property Act, tenant rights, employment non-compete, advocate consultation brief" />
     <meta name="author" content="CounterDraft Legal Intelligence" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="theme-color" content="#f8f6f0" />
-    <link rel="canonical" href="https://counterdraft.legal/" />
+    <link rel="canonical" href="https://counterdraft-app.vercel.app/" />
     <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- Open Graph Protocol (Facebook, LinkedIn, Slack) -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="CounterDraft | Legal Intelligence & Clause Negotiation Engine" />
-    <meta property="og:description" content="Demystify complex contracts, audit clause liabilities, compare agreements side-by-side, and generate statutory redlines grounded in Indian law." />
-    <meta property="og:url" content="https://counterdraft.legal/" />
+    <meta property="og:title" content="CounterDraft | GenAI Legal Assistant (Google Gemini)" />
+    <meta property="og:description" content="GenAI legal assistant powered by Google Gemini: simplify contracts, flag risky clauses, ask grounded questions, and prepare for your advocate. Grounded in Indian law." />
+    <meta property="og:url" content="https://counterdraft-app.vercel.app/" />
     <meta property="og:site_name" content="CounterDraft" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:image" content="https://counterdraft.legal/og-image.svg" />
+    <meta property="og:image" content="https://counterdraft-app.vercel.app/og-image.svg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="CounterDraft Legal Intelligence Masthead and Scales of Justice Emblem" />
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CounterDraft | Legal Intelligence & Clause Negotiation Engine" />
-    <meta name="twitter:description" content="Demystify complex contracts, audit clause liabilities, compare agreements side-by-side, and generate statutory redlines grounded in Indian law." />
-    <meta name="twitter:image" content="https://counterdraft.legal/og-image.svg" />
+    <meta name="twitter:title" content="CounterDraft | GenAI Legal Assistant (Google Gemini)" />
+    <meta name="twitter:description" content="GenAI legal assistant powered by Google Gemini: simplify contracts, flag risky clauses, ask grounded questions, and prepare for your advocate. Grounded in Indian law." />
+    <meta name="twitter:image" content="https://counterdraft-app.vercel.app/og-image.svg" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
-
-    <!-- Anti-Clickjacking Frame Guard (Defense in Depth) -->
-    <script>
-      if (window.top && window.self !== window.top) {
-        try {
-          window.top.location = window.self.location;
-        } catch {
-          document.documentElement.style.display = 'none';
-        }
-      }
-    </script>
 
     <!-- Schema.org JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -57,10 +46,10 @@
       "@graph": [
         {
           "@type": "WebApplication",
-          "@id": "https://counterdraft.legal/#webapp",
+          "@id": "https://counterdraft-app.vercel.app/#webapp",
           "name": "CounterDraft",
-          "url": "https://counterdraft.legal/",
-          "description": "Client-side legal intelligence platform providing clause risk auditing, side-by-side contract comparison, statutory counter-drafting, and advocate briefing.",
+          "url": "https://counterdraft-app.vercel.app/",
+          "description": "GenAI legal assistant powered by Google Gemini that simplifies contracts, audits clause risk, answers grounded questions with verified citations, compares agreements, and prepares advocate briefs.",
           "applicationCategory": "LegalApplication",
           "operatingSystem": "All modern browsers",
           "offers": {
@@ -69,6 +58,8 @@
             "priceCurrency": "INR"
           },
           "featureList": [
+            "Google Gemini GenAI clause analysis with verified quotes",
+            "Plain-language clause explanations in 8 Indian languages",
             "Clause Risk Auditor with statutory citations",
             "Side-by-Side Contract Comparison Diffing",
             "Financial Exposure Calculation (Deposits, Penalties, Lock-in)",
@@ -80,16 +71,16 @@
         },
         {
           "@type": "LegalService",
-          "@id": "https://counterdraft.legal/#legalservice",
+          "@id": "https://counterdraft-app.vercel.app/#legalservice",
           "name": "CounterDraft Legal Intelligence",
-          "url": "https://counterdraft.legal/",
+          "url": "https://counterdraft-app.vercel.app/",
           "serviceType": "Legal Information & Contract Comprehension Engine",
           "areaServed": "India",
           "description": "Informational legal assistance platform grounded in the Indian Contract Act, 1872 and Transfer of Property Act, 1882."
         },
         {
           "@type": "FAQPage",
-          "@id": "https://counterdraft.legal/#faq",
+          "@id": "https://counterdraft-app.vercel.app/#faq",
           "mainEntity": [
             {
               "@type": "Question",
@@ -109,10 +100,10 @@
             },
             {
               "@type": "Question",
-              "name": "Does CounterDraft store or transmit uploaded contracts to external servers?",
+              "name": "Does CounterDraft store uploaded contracts or send them to external servers?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "No. CounterDraft operates entirely client-side within your browser session under a zero-cloud-retention guarantee. No document text or queries are ever uploaded, logged, or processed externally."
+                "text": "CounterDraft keeps no database of documents. Clause text is sent to Google Gemini through a server function only when GenAI features are used, and users can switch GenAI off at upload to keep all processing in the browser."
               }
             }
           ]

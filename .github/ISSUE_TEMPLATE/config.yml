@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security Vulnerability Reporting
-    url: mailto:security@counterdraft.legal
+    url: https://github.com/Kalpesh-ops/CounterDraft/security/advisories/new
     about: Please report security vulnerabilities privately via email or GitHub security advisories.
   - name: Legal Research & Case Inquiries
-    url: https://counterdraft.legal/#precedents
+    url: https://counterdraft-app.vercel.app/#precedents
     about: Browse our public judicial precedent repository.

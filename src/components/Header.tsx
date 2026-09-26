@@ -3,6 +3,16 @@ import { ScalesIcon, DocumentIcon, CompareIcon, SearchIcon, GavelIcon, Checklist
 
 export type ActiveTab = 'auditor' | 'comparator' | 'qa' | 'precedents' | 'playbook' | 'checklist' | 'counsel';
 
+const TABS: { id: ActiveTab; label: string; Icon: React.FC<{ size?: number }> }[] = [
+  { id: 'auditor', label: 'Clause Breakdown & Risk Ledger', Icon: DocumentIcon },
+  { id: 'comparator', label: 'Contract Comparator & Redline', Icon: CompareIcon },
+  { id: 'playbook', label: 'Negotiation Email & Exposure', Icon: BriefcaseIcon },
+  { id: 'qa', label: 'Ask Gemini: Grounded Q&A', Icon: SearchIcon },
+  { id: 'precedents', label: 'Precedent Navigator (Courts & Cases)', Icon: GavelIcon },
+  { id: 'checklist', label: 'Compliance Checklist & Deadlines', Icon: ChecklistIcon },
+  { id: 'counsel', label: 'Lawyer Consultation Brief', Icon: BriefcaseIcon },
+];
+
 interface HeaderProps {
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
@@ -22,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="site-header">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       {/* Statutory Disclaimer Ticker */}
       <div className="disclaimer-banner">
         <span className="disclaimer-tag">STATUTORY NOTICE</span>
@@ -50,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
               COUNTERDRAFT<span className="brand-dot">.</span>
             </h1>
             <div className="brand-subtitle">
-              Legal Intelligence, Clause Risk Auditor & Counter-Proposal Engine
+              GenAI Legal Assistant powered by Google Gemini · Clause Risk Auditor & Counter-Proposal Engine
             </div>
           </div>
         </div>
@@ -73,69 +84,19 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Navigation Ledger Tabs */}
-      <nav className="tab-navigation">
-        <button
-          type="button"
-          onClick={() => setActiveTab('auditor')}
-          className={`tab-btn ${activeTab === 'auditor' ? 'active' : ''}`}
-        >
-          <DocumentIcon size={15} />
-          <span>Clause Breakdown & Risk Ledger</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('comparator')}
-          className={`tab-btn ${activeTab === 'comparator' ? 'active' : ''}`}
-        >
-          <CompareIcon size={15} />
-          <span>Contract Comparator & Redline</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('playbook')}
-          className={`tab-btn ${activeTab === 'playbook' ? 'active' : ''}`}
-        >
-          <BriefcaseIcon size={15} />
-          <span>Negotiation Email & Exposure</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('qa')}
-          className={`tab-btn ${activeTab === 'qa' ? 'active' : ''}`}
-        >
-          <SearchIcon size={15} />
-          <span>Grounded Q&A & Citations</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('precedents')}
-          className={`tab-btn ${activeTab === 'precedents' ? 'active' : ''}`}
-        >
-          <GavelIcon size={15} />
-          <span>Precedent Navigator (Courts & Cases)</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('checklist')}
-          className={`tab-btn ${activeTab === 'checklist' ? 'active' : ''}`}
-        >
-          <ChecklistIcon size={15} />
-          <span>Compliance Checklist & Deadlines</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('counsel')}
-          className={`tab-btn ${activeTab === 'counsel' ? 'active' : ''}`}
-        >
-          <BriefcaseIcon size={15} />
-          <span>Lawyer Consultation Brief</span>
-        </button>
+      <nav className="tab-navigation" aria-label="CounterDraft tools">
+        {TABS.map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setActiveTab(id)}
+            className={`tab-btn ${activeTab === id ? 'active' : ''}`}
+            aria-current={activeTab === id ? 'page' : undefined}
+          >
+            <Icon size={15} />
+            <span>{label}</span>
+          </button>
+        ))}
       </nav>
     </header>
   );

@@ -5,9 +5,16 @@
 
 ---
 
-## 1. Architectural Philosophy & Zero-Server Model
+## 1. Architectural Philosophy: Grounded GenAI
 
-CounterDraft is architected as a **100% client-side, local-first Single Page Application (SPA)** built with React 19, TypeScript (strict mode), and Vite.
+CounterDraft is a **GenAI legal assistant** built as a React 19 + TypeScript (strict mode) + Vite single-page application with one serverless function:
+
+- **Browser**: sanitisation, clause segmentation, the offline statutory rule engine, all seven workspaces, and printing/export.
+- **`POST /api/genai`** (`api/genai.ts` -> `server/genai.ts`): validates requests, rate-limits, builds injection-fenced prompts, calls **Google Gemini** (`generateContent`, JSON mode) with the server-held `GEMINI_API_KEY`, and verifies the output (verbatim quote check, curated-precedent check, enum and clause-number validation) before returning it.
+- **Tasks**: `analyze` (clause-by-clause audit, obligations, next steps), `qa` (grounded answers with verified citations), `simplify` (plain-language explanation in 8 Indian languages).
+- **Fallback**: if the function is unreachable, unconfigured, or rate-limited, the browser uses the deterministic `LegalEngine` and labels the result "Statutory rule engine".
+
+The diagram below shows the in-browser layer; the GenAI gateway sits between the React modules and Google Gemini.
 
 ```
                       +---------------------------------------+
@@ -66,8 +73,12 @@ legal-pw-f/
 │   ├── USER_MANUAL.md       # Signatory workflow guide
 │   ├── FAQ.md               # Legal & technical FAQ
 │   └── blog/                # Authoritative legal analysis explainers
+├── api/
+│   └── genai.ts             # Vercel Function: POST /api/genai (Gemini gateway)
+├── server/
+│   ├── genai.ts             # Validation, prompts, Gemini call, output verification
+│   └── genai.test.ts        # Gateway tests (Gemini mocked)
 ├── public/                  # Static assets & SEO discovery standards
-│   ├── _headers             # Enterprise HTTP response headers
 │   ├── favicon.svg          # Scales of justice vector emblem
 │   ├── llms.txt             # LLM context manifest (llmstxt.org)
 │   ├── llms-full.txt        # Deep legal prompt grounding context

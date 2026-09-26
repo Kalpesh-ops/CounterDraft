@@ -263,22 +263,8 @@ export function parseCustomContract(rawText: string, customTitle?: string, custo
     };
   });
 
-  const highCount = clauses.filter(c => c.riskLevel === 'high').length;
-  const cautionCount = clauses.filter(c => c.riskLevel === 'caution').length;
-  const standardCount = clauses.filter(c => c.riskLevel === 'standard').length;
-  const favorableCount = clauses.filter(c => c.riskLevel === 'favorable').length;
-
-  const total = clauses.length || 1;
-  const overallRiskScore = Math.min(95, Math.round(((highCount * 30) + (cautionCount * 15) + (standardCount * 5)) / total * 3.5));
-
-  const keyVulnerabilities: string[] = clauses
-    .filter(c => c.riskLevel === 'high')
-    .map(c => c.title + ': ' + c.plainSummary)
-    .slice(0, 4);
-
-  if (keyVulnerabilities.length === 0) {
-    keyVulnerabilities.push('Standard commercial provisions with standard bilateral risks.');
-  }
+  const { overallRiskScore, riskSummary, keyVulnerabilities } = computeRiskMetrics(clauses);
+  const { highCount, cautionCount } = riskSummary;
 
   const obligations: ObligationItem[] = clauses.slice(0, 3).map((c, i) => ({
     id: 'custom-ob-' + (i + 1),
@@ -303,18 +289,47 @@ export function parseCustomContract(rawText: string, customTitle?: string, custo
       partyB: 'Second Party (Recipient / You)'
     },
     overallRiskScore,
-    riskSummary: {
-      highCount,
-      cautionCount,
-      standardCount,
-      favorableCount
-    },
+    riskSummary,
     executiveSummary: 'This document comprises ' + clauses.length + ' provisions. Our automated audit flagged ' + highCount + ' high-risk clauses and ' + cautionCount + ' caution-level provisions requiring careful examination before execution.',
     keyVulnerabilities,
     clauses,
     obligations,
-    precedentLinks: ['prec-001', 'prec-002', 'prec-003']
+    precedentLinks: ['prec-001', 'prec-002', 'prec-003'],
+    analysisSource: 'rules'
   };
+}
+
+/**
+ * Derives the composite risk score (0-100), per-level clause counts, and the top
+ * high-risk vulnerabilities from a set of analysed clauses.
+ *
+ * @param clauses - Analysed clauses (from the rule engine or GenAI).
+ * @returns Risk metrics suitable for spreading onto a LegalDocument.
+ */
+export function computeRiskMetrics(clauses: ClauseAnalysis[]): Pick<LegalDocument, 'overallRiskScore' | 'riskSummary' | 'keyVulnerabilities'> {
+  const riskSummary = { highCount: 0, cautionCount: 0, standardCount: 0, favorableCount: 0 };
+  for (const c of clauses) {
+    if (c.riskLevel === 'high') riskSummary.highCount++;
+    else if (c.riskLevel === 'caution') riskSummary.cautionCount++;
+    else if (c.riskLevel === 'standard') riskSummary.standardCount++;
+    else riskSummary.favorableCount++;
+  }
+
+  const total = clauses.length || 1;
+  const overallRiskScore = Math.min(
+    95,
+    Math.round(((riskSummary.highCount * 30) + (riskSummary.cautionCount * 15) + (riskSummary.standardCount * 5)) / total * 3.5)
+  );
+
+  const keyVulnerabilities = clauses
+    .filter(c => c.riskLevel === 'high')
+    .map(c => c.title + ': ' + c.plainSummary)
+    .slice(0, 4);
+  if (keyVulnerabilities.length === 0) {
+    keyVulnerabilities.push('Standard commercial provisions with standard bilateral risks.');
+  }
+
+  return { overallRiskScore, riskSummary, keyVulnerabilities };
 }
 
 /**
@@ -386,7 +401,8 @@ export function queryDocumentGrounded(doc: LegalDocument, question: string): Gro
       'What specific counter-proposal should I present on this clause?',
       'Does this clause create personal liability or corporate liability?',
       'What happens if I give notice earlier than the stipulated deadline?'
-    ]
+    ],
+    analysisSource: 'rules'
   };
 }
 

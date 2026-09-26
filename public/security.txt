@@ -1,9 +1,9 @@
 # CounterDraft Vulnerability Disclosure Policy (RFC 9116)
-# https://counterdraft.legal/security.txt
+# https://counterdraft-app.vercel.app/security.txt
 
-Contact: mailto:security@counterdraft.legal
+Contact: https://github.com/Kalpesh-ops/CounterDraft/security/advisories/new
 Expires: 2027-12-31T23:59:59.000Z
 Preferred-Languages: en
-Canonical: https://counterdraft.legal/.well-known/security.txt
-Policy: https://counterdraft.legal/#privacy
-Acknowledgments: https://counterdraft.legal/#precedents
+Canonical: https://counterdraft-app.vercel.app/.well-known/security.txt
+Policy: https://counterdraft-app.vercel.app/#privacy
+Acknowledgments: https://counterdraft-app.vercel.app/#precedents
