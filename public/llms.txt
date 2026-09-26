@@ -47,5 +47,5 @@ CounterDraft evaluates contractual enforceability against statutory benchmarks u
 
 - **Type**: Single Page Web Application (SPA)
 - **Technology**: React 19, TypeScript, Vite
-- **Repository / Source**: https://github.com/kalpeshparashar/counterdraft
+- **Repository / Source**: https://github.com/Kalpesh-ops/CounterDraft
 - **Documentation**: https://counterdraft.legal/llms-full.txt

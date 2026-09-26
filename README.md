@@ -2,7 +2,7 @@
 
 > **Accessible, privacy-first legal document intelligence, clause risk auditing, side-by-side contract comparison, and statutory counter-proposal drafts grounded in Indian statutory law and landmark Supreme Court jurisprudence.**
 
-[![CI/CD Pipeline](https://github.com/kalpeshparashar/counterdraft/actions/workflows/ci.yml/badge.svg)](https://github.com/kalpeshparashar/counterdraft/actions)
+[![CI/CD Pipeline](https://github.com/Kalpesh-ops/CounterDraft/actions/workflows/ci.yml/badge.svg)](https://github.com/Kalpesh-ops/CounterDraft/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Zero Cloud Retention](https://img.shields.io/badge/Privacy-Zero_Cloud_Retention-2d4a22.svg)](#privacy--zero-server-model)
 [![Tests Passing](https://img.shields.io/badge/Tests-32%20passing-brightgreen.svg)](#testing)
@@ -135,8 +135,8 @@ CounterDraft implements modern web discovery and AI agent context protocols in t
 
 ```bash
 # Clone the repository
-git clone https://github.com/kalpeshparashar/counterdraft.git
-cd counterdraft
+git clone https://github.com/Kalpesh-ops/CounterDraft.git
+cd CounterDraft
 
 # Install dependencies
 npm install

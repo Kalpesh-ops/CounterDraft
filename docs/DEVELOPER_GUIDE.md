@@ -14,8 +14,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/kalpeshparashar/counterdraft.git
-cd counterdraft
+git clone https://github.com/Kalpesh-ops/CounterDraft.git
+cd CounterDraft
 
 # Install dependencies
 npm install

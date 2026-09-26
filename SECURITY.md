@@ -20,7 +20,7 @@ We provide security patches and dependency updates for the current major release
 If you discover a security vulnerability, potential cross-site scripting (XSS) vector, Regular Expression Denial of Service (ReDoS) vulnerability, or client-side data leakage issue, please report it responsibly:
 
 - **Email**: Send vulnerability reports directly to [security@counterdraft.legal](mailto:security@counterdraft.legal).
-- **GitHub Security Advisory**: You may also submit a private report via GitHub's [Advisory Submission](https://github.com/kalpeshparashar/counterdraft/security/advisories/new) interface.
+- **GitHub Security Advisory**: You may also submit a private report via GitHub's [Advisory Submission](https://github.com/Kalpesh-ops/CounterDraft/security/advisories/new) interface.
 
 ### What to Include in Your Report
 To help us triage and remediate the issue promptly, please include:
