@@ -81,16 +81,30 @@ export function analyzeClauseRisk(text: string, title: string): {
 
   // Unilateral termination & lock-in
   if (lower.includes('terminate') || lower.includes('termination') || lower.includes('lock-in') || lowerTitle.includes('termination')) {
-    const isAsymmetric = lower.includes('sole discretion') || (lower.includes('without paying') && lower.includes('notice'));
+    const isAsymmetric = lower.includes('sole discretion') ||
+      (lower.includes('without paying') && lower.includes('notice')) ||
+      lower.includes('immediately without notice') ||
+      lower.includes('without notice') ||
+      lower.includes('unilateral');
+
+    const isMutualStandard = (lower.includes('either party') || lower.includes('each party')) &&
+      (lower.includes('30 days') || lower.includes('thirty (30) days') || lower.includes('60 days'));
+
+    const riskLevel: RiskLevel = isAsymmetric ? 'high' : isMutualStandard ? 'standard' : 'caution';
+
     return {
-      riskLevel: isAsymmetric ? 'high' : 'caution',
+      riskLevel,
       riskRationale: isAsymmetric
-        ? 'Grants one party asymmetric power to cancel or walk away while binding the other party to strict financial penalties.'
+        ? 'Grants one party asymmetric power to cancel or walk away without notice, leaving the counterparty vulnerable.'
+        : isMutualStandard
+        ? 'Mutual termination clause with standard 30+ day advance notice window.'
         : 'Outlines how and when either side can end the contract. Requires scrutiny of notice periods and wind-down procedures.',
       statutoryContext: 'Central Inland Water Transport Corp v. Brojo Nath Ganguly (1986) 3 SCC 156.',
       precedentCitation: 'Central Inland Water Transport Corp v. Brojo Nath Ganguly (1986) 3 SCC 156',
       plainSummary: isAsymmetric
-        ? 'They can terminate you on a whim without compensation, while you face hefty penalties if you leave.'
+        ? 'They can terminate the contract immediately without giving you notice or compensation.'
+        : isMutualStandard
+        ? 'Either party can exit the contract by providing 30 days advance written notice.'
         : 'Specifies the notice timeline and exit protocols required to terminate the agreement.',
       recommendedCounterProposal: 'Ensure identical notice periods apply to both sides (e.g. 30 days written notice) with pro-rata compensation for any unserved notice period.',
       category: 'termination',
@@ -159,8 +173,8 @@ export function parseCustomContract(rawText: string, customTitle?: string, custo
     text: ''
   };
 
-  const clauseRegex = /^(?:section|clause|article|paragraph|\u00A7)\s*([0-9]+(?:\.[0-9]+)*)[:\.\-\s]+(.*)$/i;
-  const numRegex = /^([0-9]+(?:\.[0-9]+)*)[:\.\-\s]+(.*)$/;
+  const clauseRegex = /^(?:section|clause|article|paragraph|\u00A7)\s*([0-9]+(?:\.[0-9]+)*)[.:\-\s]+(.*)$/i;
+  const numRegex = /^([0-9]+(?:\.[0-9]+)*)[.:\-\s]+(.*)$/;
 
   for (const line of lines) {
     const clauseMatch = line.match(clauseRegex);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { LegalDocument } from '../types/legal';
 import { parseCustomContract } from '../services/legalEngine';
+import { validateContractPayload } from '../utils/security';
 import { DocumentIcon, CloseIcon } from './Icons';
 
 interface DocumentUploaderProps {
@@ -81,13 +82,14 @@ This Agreement shall be governed by the laws of India. Any legal dispute shall b
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!rawText.trim() || rawText.trim().length < 50) {
-      setErrorMsg('Please paste or upload at least 50 characters of contract text to analyze.');
+    const validation = validateContractPayload(rawText, docTitle);
+    if (!validation.isValid) {
+      setErrorMsg(validation.errorMessage || 'Invalid contract text.');
       return;
     }
 
     try {
-      const parsedDoc = parseCustomContract(rawText, docTitle || 'Custom Uploaded Agreement', docType);
+      const parsedDoc = parseCustomContract(validation.cleanText, validation.cleanTitle, docType);
       onDocumentLoaded(parsedDoc);
       onClose();
     } catch {

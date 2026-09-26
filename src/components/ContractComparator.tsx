@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { ComparisonPair, ComparisonDiff } from '../types/legal';
 import { sampleComparisonPairs } from '../data/sampleContracts';
 import { parseCustomContract, compareCustomDocuments } from '../services/legalEngine';
+import { validateContractPayload } from '../utils/security';
 import { CompareIcon, ShieldAlertIcon, PlusIcon, CloseIcon, DocumentIcon } from './Icons';
 
 interface ContractComparatorProps {
@@ -21,6 +22,7 @@ export const ContractComparator: React.FC<ContractComparatorProps> = ({ customPa
   const [docBTitle, setDocBTitle] = useState<string>('Counterparty Revised Addendum');
   const [docAText, setDocAText] = useState<string>('');
   const [docBText, setDocBText] = useState<string>('');
+  const [comparisonError, setComparisonError] = useState<string>('');
 
   const currentPair = pairsList.find((p) => p.id === selectedPairId) || pairsList[0];
 
@@ -31,14 +33,25 @@ export const ContractComparator: React.FC<ContractComparatorProps> = ({ customPa
 
   const handleCreateCustomComparison = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!docAText.trim() || !docBText.trim()) return;
+    const valA = validateContractPayload(docAText, docATitle);
+    const valB = validateContractPayload(docBText, docBTitle);
 
-    const parsedA = parseCustomContract(docAText, docATitle, 'Baseline Version');
-    const parsedB = parseCustomContract(docBText, docBTitle, 'Counter Draft Version');
+    if (!valA.isValid) {
+      setComparisonError(`Document A: ${valA.errorMessage}`);
+      return;
+    }
+    if (!valB.isValid) {
+      setComparisonError(`Document B: ${valB.errorMessage}`);
+      return;
+    }
+
+    const parsedA = parseCustomContract(valA.cleanText, valA.cleanTitle, 'Baseline Version');
+    const parsedB = parseCustomContract(valB.cleanText, valB.cleanTitle, 'Counter Draft Version');
     const newPair = compareCustomDocuments(parsedA, parsedB);
 
     setPairsList((prev) => [newPair, ...prev]);
     setSelectedPairId(newPair.id);
+    setComparisonError('');
     setIsCustomModalOpen(false);
   };
 
@@ -339,6 +352,8 @@ Consultant shall indemnify and hold harmless Client for any third-party claims. 
                   />
                 </div>
               </div>
+
+              {comparisonError && <div className="form-error-banner">{comparisonError}</div>}
 
               <div className="modal-actions-bar">
                 <button

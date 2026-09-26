@@ -2243,6 +2243,10 @@ input:focus, select:focus, textarea:focus {
   border: 1px solid var(--border-color);
   padding: 30px;
   text-align: center;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
 /* NEGOTIATION PLAYBOOK & EMAIL DRAFTING */
 .negotiation-playbook-container {
   display: flex;

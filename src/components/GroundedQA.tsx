@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { LegalDocument, GroundedQAResponse } from '../types/legal';
 import { queryDocumentGrounded } from '../services/legalEngine';
+import { sanitizeQuery } from '../utils/security';
 import { SearchIcon, DocumentIcon, GavelIcon, ShieldAlertIcon } from './Icons';
 
 interface GroundedQAProps {
@@ -49,15 +50,16 @@ export const GroundedQA: React.FC<GroundedQAProps> = ({
       ];
 
   const handleRunQuery = (questionText: string) => {
-    if (!questionText.trim()) return;
+    const cleanQuestion = sanitizeQuery(questionText);
+    if (!cleanQuestion) return;
     setIsProcessing(true);
 
     setTimeout(() => {
-      const response = queryDocumentGrounded(document, questionText.trim());
+      const response = queryDocumentGrounded(document, cleanQuestion);
       setQaHistory((prev) => [response, ...prev]);
       setQuery('');
       setIsProcessing(false);
-    }, 300);
+    }, 200);
   };
 
   return (

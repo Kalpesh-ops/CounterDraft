@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { LegalDocument, ObligationItem } from '../types/legal';
+import { sanitizeInput } from '../utils/security';
 import { ChecklistIcon, PlusIcon, DownloadIcon } from './Icons';
 
 interface ActionChecklistProps {
@@ -94,12 +95,13 @@ export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) =>
 
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    const clean = sanitizeInput(newTitle);
+    if (!clean) return;
 
     const newItem: ChecklistItem = {
       id: 'custom-chk-' + Date.now(),
       stage: newStage,
-      title: newTitle.trim(),
+      title: clean,
       description: 'User-specified action item for contractual compliance.',
       deadlineOrTiming: 'As scheduled by user',
       clauseRef: 'General Protocol',

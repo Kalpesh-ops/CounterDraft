@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { LegalDocument } from '../types/legal';
 import { generateCounselBrief } from '../services/legalEngine';
+import { sanitizeInput } from '../utils/security';
 import { BriefcaseIcon, DownloadIcon, CheckIcon, ShieldAlertIcon } from './Icons';
 
 interface CounselBriefGeneratorProps {
@@ -11,7 +12,7 @@ export const CounselBriefGenerator: React.FC<CounselBriefGeneratorProps> = ({ do
   const [clientName, setClientName] = useState<string>('Client Signatory');
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
-  const brief = generateCounselBrief(document, clientName);
+  const brief = generateCounselBrief(document, sanitizeInput(clientName) || 'Client Signatory');
 
   const handlePrintOrDownload = () => {
     window.print();

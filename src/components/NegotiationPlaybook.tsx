@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { LegalDocument } from '../types/legal';
 import { generateNegotiationEmail, calculateFinancialExposure } from '../services/legalEngine';
+import { sanitizeInput } from '../utils/security';
 import { BriefcaseIcon, CheckIcon, ShieldAlertIcon } from './Icons';
 
 interface NegotiationPlaybookProps {
@@ -18,7 +19,9 @@ export const NegotiationPlaybook: React.FC<NegotiationPlaybookProps> = ({ docume
   );
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
-  const emailDraft = generateNegotiationEmail(document, senderName, recipientName);
+  const cleanSender = sanitizeInput(senderName) || 'Prospective Signatory';
+  const cleanRecipient = sanitizeInput(recipientName) || 'Counterparty';
+  const emailDraft = generateNegotiationEmail(document, cleanSender, cleanRecipient);
   const financialExposure = calculateFinancialExposure(document);
 
   const handleCopyEmail = () => {
