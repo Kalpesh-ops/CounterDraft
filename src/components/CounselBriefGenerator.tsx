@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { LegalDocument } from '../types/legal';
 import { generateCounselBrief } from '../services/legalEngine';
-import { sanitizeInput } from '../utils/security';
+import { sanitizeInput, safeCopyToClipboard } from '../utils/security';
 import { BriefcaseIcon, DownloadIcon, CheckIcon, ShieldAlertIcon } from './Icons';
 
 interface CounselBriefGeneratorProps {
@@ -52,9 +52,12 @@ export const CounselBriefGenerator: React.FC<CounselBriefGeneratorProps> = ({ do
       text += '  - ' + nc + '\n';
     });
 
-    navigator.clipboard.writeText(text);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+    safeCopyToClipboard(text).then((success) => {
+      if (success) {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      }
+    });
   };
 
   return (

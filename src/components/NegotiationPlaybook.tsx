@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { LegalDocument } from '../types/legal';
 import { generateNegotiationEmail, calculateFinancialExposure } from '../services/legalEngine';
-import { sanitizeInput } from '../utils/security';
+import { sanitizeInput, safeCopyToClipboard } from '../utils/security';
 import { BriefcaseIcon, CheckIcon, ShieldAlertIcon } from './Icons';
 
 interface NegotiationPlaybookProps {
@@ -25,9 +25,12 @@ export const NegotiationPlaybook: React.FC<NegotiationPlaybookProps> = ({ docume
   const financialExposure = calculateFinancialExposure(document);
 
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText(`Subject: ${emailDraft.subject}\n\n${emailDraft.bodyText}`);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+    safeCopyToClipboard(`Subject: ${emailDraft.subject}\n\n${emailDraft.bodyText}`).then((success) => {
+      if (success) {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      }
+    });
   };
 
   return (

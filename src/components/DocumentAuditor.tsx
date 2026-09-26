@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { LegalDocument, RiskLevel } from '../types/legal';
+import { safeCopyToClipboard } from '../utils/security';
 import { FilterIcon, ShieldAlertIcon, DocumentIcon } from './Icons';
 
 interface DocumentAuditorProps {
@@ -31,11 +32,14 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
   });
 
   const handleCopyRedline = (clauseId: string, text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedClauseId(clauseId);
-    setTimeout(() => {
-      setCopiedClauseId(null);
-    }, 2000);
+    safeCopyToClipboard(text).then((success) => {
+      if (success) {
+        setCopiedClauseId(clauseId);
+        setTimeout(() => {
+          setCopiedClauseId(null);
+        }, 2000);
+      }
+    });
   };
 
   return (

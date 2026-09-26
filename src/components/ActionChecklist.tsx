@@ -129,9 +129,13 @@ export const ActionChecklist: React.FC<ActionChecklistProps> = ({ document }) =>
     const url = URL.createObjectURL(blob);
     const a = window.document.createElement('a');
     a.href = url;
-    a.download = 'juris_compliance_checklist.txt';
+    a.download = 'counterdraft_compliance_checklist.txt';
+    window.document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    window.document.body.removeChild(a);
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
   };
 
   const filteredItems = items.filter((item) => {

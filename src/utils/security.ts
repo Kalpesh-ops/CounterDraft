@@ -59,13 +59,13 @@ export function sanitizeLegalText(rawText: unknown): string {
   // Strip null bytes
   text = text.replace(/\0/g, '');
 
-  // Neutralize script tags, object, embed, iframe
-  text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  text = text.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
-  text = text.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '');
-  text = text.replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '');
+  // Neutralize script tags, object, embed, iframe (linear non-backtracking)
+  text = text.replace(/<script\b[\s\S]*?<\/script>/gi, '');
+  text = text.replace(/<iframe\b[\s\S]*?<\/iframe>/gi, '');
+  text = text.replace(/<object\b[\s\S]*?<\/object>/gi, '');
+  text = text.replace(/<embed\b[\s\S]*?<\/embed>/gi, '');
 
-  // Strip html markup while preserving legal text formatting
+  // Strip remaining opened or unclosed tags
   text = text.replace(/<\/?[a-z][a-z0-9]*\b[^>]*>/gi, '');
 
   // Strip dangerous protocol patterns
@@ -126,4 +126,39 @@ export function validateContractPayload(rawText: string, title?: string): {
     cleanText,
     cleanTitle
   };
+}
+
+/**
+ * Safely copies text to the system clipboard with automatic fallback
+ * and graceful rejection handling (no unhandled promises).
+ */
+export async function safeCopyToClipboard(text: string): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+
+  // 1. Try modern Async Clipboard API
+  if (window.navigator?.clipboard && typeof window.navigator.clipboard.writeText === 'function') {
+    try {
+      await window.navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Permission denied or non-secure origin - proceed to fallback
+    }
+  }
+
+  // 2. Fallback to hidden textarea execCommand
+  try {
+    const textarea = window.document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    textarea.style.top = '-9999px';
+    textarea.setAttribute('readonly', '');
+    window.document.body.appendChild(textarea);
+    textarea.select();
+    const success = window.document.execCommand('copy');
+    window.document.body.removeChild(textarea);
+    return success;
+  } catch {
+    return false;
+  }
 }

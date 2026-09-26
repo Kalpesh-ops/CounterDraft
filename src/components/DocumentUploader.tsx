@@ -26,16 +26,40 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!docTitle) {
-      setDocTitle(file.name.replace(/\.[^/.]+$/, ''));
+    // 1. Guard against memory bomb DoS (> 2 MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setErrorMsg('File exceeds maximum permitted size of 2 MB. Please provide a standard text contract.');
+      e.target.value = '';
+      return;
     }
 
+    // 2. Guard against binary / executable / script-bearing MIME types
+    const fileName = file.name.toLowerCase();
+    const validExtensions = ['.txt', '.doc', '.docx', '.md', '.rtf', '.json', '.legal', '.contract'];
+    const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+    const isValidMime = !file.type || file.type.startsWith('text/') || file.type === 'application/json' || file.type === 'application/msword';
+
+    if (!hasValidExtension && !isValidMime) {
+      setErrorMsg('Unsupported file format. Please upload a plain text contract (.txt, .md, .doc, .rtf, or .json).');
+      e.target.value = '';
+      return;
+    }
+
+    if (!docTitle) {
+      setDocTitle(file.name.replace(/\.[^/.]+$/, '').slice(0, 80));
+    }
+
+    setErrorMsg('');
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result as string;
       setRawText(content || '');
     };
+    reader.onerror = () => {
+      setErrorMsg('An error occurred while reading the file. Please verify file permissions.');
+    };
     reader.readAsText(file);
+    e.target.value = '';
   };
 
   const handleLoadSample = (sampleType: 'nda' | 'consultancy') => {
