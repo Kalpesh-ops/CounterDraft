@@ -271,11 +271,17 @@ Consultant shall indemnify and hold harmless Client for any third-party claims. 
       {/* Custom Pair Comparison Modal */}
       {isCustomModalOpen && (
         <div className="modal-backdrop" onClick={() => setIsCustomModalOpen(false)}>
-          <div className="modal-folio modal-folio-large" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-folio modal-folio-large"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="custom-compare-title"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <div className="modal-title-group">
                 <CompareIcon size={18} />
-                <h2>COMPARE ANY TWO CUSTOM CONTRACTS</h2>
+                <h2 id="custom-compare-title">COMPARE ANY TWO CUSTOM CONTRACTS</h2>
               </div>
               <button
                 type="button"

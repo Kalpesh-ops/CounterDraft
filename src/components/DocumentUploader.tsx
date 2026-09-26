@@ -123,12 +123,18 @@ This Agreement shall be governed by the laws of India. Any legal dispute shall b
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-folio" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-folio"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="upload-modal-title"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Modal Header */}
         <div className="modal-header">
           <div className="modal-title-group">
             <DocumentIcon size={18} />
-            <h2>UPLOAD OR PASTE CUSTOM CONTRACT FOR AUDIT</h2>
+            <h2 id="upload-modal-title">UPLOAD OR PASTE CUSTOM CONTRACT FOR AUDIT</h2>
           </div>
           <button type="button" onClick={onClose} className="modal-close-btn" aria-label="Close dialog">
             <CloseIcon size={16} />

@@ -11,11 +11,17 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-folio modal-folio-large" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-folio modal-folio-large"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="terms-modal-title"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <div className="modal-title-group">
             <ShieldAlertIcon size={18} />
-            <h2>TERMS OF SERVICE AND LEGAL NOTICE</h2>
+            <h2 id="terms-modal-title">TERMS OF SERVICE AND LEGAL NOTICE</h2>
           </div>
           <button type="button" onClick={onClose} className="modal-close-btn" aria-label="Close dialog">
             <CloseIcon size={16} />

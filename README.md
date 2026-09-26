@@ -9,11 +9,72 @@
 
 ---
 
-## Overview
+## Submission Information
 
-Legal agreements are inherently asymmetrical. Corporate landlords, dominant employers, and enterprise software vendors deploy standardized adhesion contracts packed with unilateral termination rights, unliquidated deposit forfeiture clauses, post-tenure non-competes, and one-sided indemnity waivers.
+- **Project Name**: CounterDraft
+- **Chosen Challenge Vertical**: Legal Information & Basic Legal Assistance Accessibility
+- **Repository Visibility**: Public GitHub Repository
+- **Repository Branch Count**: Exactly 1 branch (`main`)
+- **Repository Size**: ~345 KiB (Strictly compliant with `< 10 MB` ceiling)
+- **Deployment**: Static SPA deployable to GitHub Pages / Cloudflare Pages / Vercel
 
-**CounterDraft** is an autonomous legal intelligence system built to level this playing field for prospective signatories—tenants, employees, independent contractors, and MSMEs. Operating on a **100% client-side, local-first architecture**, it translates dense contractual legalese into structured risk analysis, quantifiable financial exposures, balanced counter-proposals, and formal consultation briefs for advocates.
+---
+
+## 1. Chosen Vertical & Challenge Alignment
+
+Legal information is structurally complex, terminology-dense, and notoriously difficult for non-lawyers to navigate without expensive legal representation. Individual signatories—such as residential tenants, tech employees, independent consultants, and MSME vendors—frequently sign standardized adhesion contracts containing unilateral termination powers, illegal security deposit forfeitures, uncapped indemnities, and void non-competes.
+
+**CounterDraft** is engineered specifically for the **Legal Information & Basic Legal Assistance Accessibility** vertical. It demystifies opaque legal drafting, evaluates clause enforceability against codified Indian statutes and landmark Supreme Court precedents, and equips signatories with actionable, balanced counter-drafts and advocate briefing memoranda before signing.
+
+---
+
+## 2. Approach and Logic
+
+1. **Deterministic Statutory Grounding vs. Black-Box Hallucination**:
+   Rather than piping unvetted contract text into an unconstrained system prompt that risks hallucinating non-existent statutory citations or yielding to adversarial prompt injection, CounterDraft pairs algorithmic document segmentation with codified legal principles (*Indian Contract Act, 1872* and *Transfer of Property Act, 1882*) and binding Supreme Court rulings (*Percept D'Mark*, *Kailash Nath Associates*, *Central Inland Water Transport*).
+2. **Asymmetry Rebalancing Engine**:
+   Every flagged high-risk clause automatically generates a reciprocal, legally grounded **redline counter-proposal** that can be immediately copied into an ongoing negotiation.
+3. **Local-First Zero-Cloud-Retention Architecture**:
+   To guarantee absolute client confidentiality, 100% of document ingestion, parsing, comparison, and brief compilation execute client-side in browser memory. No confidential contract data is transmitted to or stored on external servers.
+4. **ReDoS-Immune Linear Processing**:
+   All text segmentation and keyword matching algorithms operate with bounded, non-overlapping linear time complexity $O(N)$, ensuring zero Regular Expression Denial of Service vulnerabilities even on massive 1 MB contract payloads.
+
+---
+
+## 3. How the Solution Works
+
+```
+[ User Input: File / Text ]
+          │
+          ▼
+[ Security & Sanitization Layer ] ──► Size Cap (2 MB) & Script Neutralizer
+          │
+          ▼
+[ Clause Segmentation Parser ] ──► Regex Boundary & Paragraph Chunking
+          │
+          ▼
+[ Statutory Rule Evaluator ] ──► ICA 1872 / TPA 1882 Heuristic Matching
+          │
+          ├─────────────────────────────────────────────────┐
+          ▼                                                 ▼
+[ Multi-Module Output Pipeline ]               [ Quantified Risk Engine ]
+  • Clause Risk Auditor                          • Composite Risk Score (0-95)
+  • Side-by-Side Diff Comparator                 • Deposit at Risk Metric
+  • Negotiation Letter Generator                 • Daily Delay Penalties
+  • Grounded Q&A Inquiries                       • Lock-in Period Liabilities
+  • Precedent Case Law Index                     • Net Favorability Shift
+  • Counsel Consultation Brief
+  • Actionable Safeguard Checklist
+```
+
+---
+
+## 4. Key Assumptions Made
+
+1. **Jurisdiction & Legal Framework**: Grounded primarily in Indian statutory law (*Indian Contract Act, 1872*, *Transfer of Property Act, 1882*, and Supreme Court appellate jurisprudence), which forms the core benchmark for commercial and civil contracting across India. The underlying principles of unconscionability, direct damage causality, and bilateral reciprocity remain structurally relevant across common-law jurisdictions.
+2. **Language**: Designed for English-language legal agreements, which represent the universal standard for corporate, tenancy, employment, and commercial contracts in India.
+3. **Informational & Assistive Mandate**: Assumes the role of an intelligent informational assistant. CounterDraft explicitly disclaims formal legal representation and provides users with a structured Counsel Brief to maximize the efficiency and value of subsequent consultations with enrolled advocates.
+4. **Client Environment**: Assumes modern web standards supporting HTML5, ES2022 JavaScript, Web Cryptography/Clipboard APIs, and local File API.
 
 ---
 
