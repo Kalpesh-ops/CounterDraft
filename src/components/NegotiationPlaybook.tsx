@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import type { LegalDocument } from '../types/legal';
 import { generateNegotiationEmail, calculateFinancialExposure } from '../services/legalEngine';
-import { sanitizeInput, safeCopyToClipboard } from '../utils/security';
+import { sanitizeInput } from '../utils/security';
+import { useCopyFeedback, COPY_FAILED_LABEL } from '../hooks/useCopyFeedback';
 import { BriefcaseIcon, CheckIcon, ShieldAlertIcon } from './Icons';
 
 interface NegotiationPlaybookProps {
@@ -17,7 +18,8 @@ export const NegotiationPlaybook: React.FC<NegotiationPlaybookProps> = ({ docume
       ? 'Hiring Team & HR Director'
       : 'Contract Administrator'
   );
-  const [isCopied, setIsCopied] = useState<boolean>(false);
+  const { copy, statusFor } = useCopyFeedback();
+  const copyStatus = statusFor();
 
   const cleanSender = sanitizeInput(senderName) || 'Prospective Signatory';
   const cleanRecipient = sanitizeInput(recipientName) || 'Counterparty';
@@ -29,12 +31,7 @@ export const NegotiationPlaybook: React.FC<NegotiationPlaybookProps> = ({ docume
   const highRiskCount = useMemo(() => document.clauses.filter(c => c.riskLevel === 'high').length, [document.clauses]);
 
   const handleCopyEmail = () => {
-    safeCopyToClipboard(`Subject: ${emailDraft.subject}\n\n${emailDraft.bodyText}`).then((success) => {
-      if (success) {
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
-      }
-    });
+    void copy(`Subject: ${emailDraft.subject}\n\n${emailDraft.bodyText}`);
   };
 
   return (
@@ -53,8 +50,8 @@ export const NegotiationPlaybook: React.FC<NegotiationPlaybookProps> = ({ docume
               onClick={handleCopyEmail}
               className="action-btn-primary"
             >
-              {isCopied ? <CheckIcon size={14} /> : <BriefcaseIcon size={14} />}
-              <span>{isCopied ? 'Email Copied to Clipboard' : 'Copy Negotiation Email'}</span>
+              {copyStatus === 'copied' ? <CheckIcon size={14} /> : <BriefcaseIcon size={14} />}
+              <span aria-live="polite">{copyStatus === 'copied' ? 'Email Copied to Clipboard' : copyStatus === 'failed' ? COPY_FAILED_LABEL : 'Copy Negotiation Email'}</span>
             </button>
           </div>
         </div>

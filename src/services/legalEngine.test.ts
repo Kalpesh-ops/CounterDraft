@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   analyzeClauseRisk,
   parseCustomContract,
+  detectClauseHeading,
   queryDocumentGrounded,
   compareCustomDocuments,
   calculateFinancialExposure,
@@ -79,6 +80,86 @@ This is the third paragraph that stipulates governing jurisdiction under local s
     const doc = parseCustomContract(rawParagraphs, 'Unstructured Contract');
     expect(doc.clauses.length).toBe(3);
     expect(doc.clauses[0].clauseNumber).toBe('Clause 1');
+  });
+});
+
+describe('Legal Intelligence Engine - Tenancy and Covenant Heuristics', () => {
+  it('flags landlord entry on short or verbal notice as a quiet-enjoyment risk', () => {
+    const result = analyzeClauseRisk('The Landlord may enter the flat at any time with 2 hours verbal notice.', 'Entry');
+    expect(result.riskLevel).toBe('caution');
+    expect(result.statutoryContext).toContain('Section 108');
+  });
+
+  it('treats entry after 24 hours written notice as standard', () => {
+    const result = analyzeClauseRisk('The Landlord may enter the premises after giving 48 hours written notice.', 'Inspection');
+    expect(result.riskLevel).toBe('standard');
+  });
+
+  it('recognises a post-exit business ban as a void restraint of trade', () => {
+    const result = analyzeClauseRisk('The Tenant shall not run any home business in this city for 2 years after leaving.', 'Non-Compete');
+    expect(result.riskLevel).toBe('high');
+    expect(result.statutoryContext).toContain('Section 27');
+  });
+
+  it('does not treat intellectual property access as a right-of-entry clause', () => {
+    const result = analyzeClauseRisk('Consultant shall have access to intellectual property owned by the Company.', 'Access to Materials');
+    expect(result.tags).not.toContain('right of entry');
+  });
+});
+
+describe('Legal Intelligence Engine - Clause Segmentation', () => {
+  it('recognises the common heading styles used in Indian contracts', () => {
+    expect(detectClauseHeading('Section 4.1: Security Deposit')).toMatchObject({ number: 'Section 4.1', title: 'Security Deposit' });
+    expect(detectClauseHeading('ARTICLE IV - TERMINATION')).toMatchObject({ number: 'Article IV' });
+    expect(detectClauseHeading('§ 7 Governing Law')).toMatchObject({ number: 'Section 7', title: 'Governing Law' });
+    expect(detectClauseHeading('2) Rent and Escalation')).toMatchObject({ number: 'Clause 2', title: 'Rent and Escalation' });
+    expect(detectClauseHeading('1.1 Grant of Licence')).toMatchObject({ number: 'Clause 1.1', title: 'Grant of Licence' });
+    expect(detectClauseHeading('## Section 9. Arbitration')).toMatchObject({ number: 'Section 9', title: 'Arbitration' });
+    expect(detectClauseHeading('## Dispute Resolution')).toMatchObject({ number: null, title: 'Dispute Resolution' });
+    expect(detectClauseHeading('INDEMNITY AND LIABILITY')).toMatchObject({ number: null, title: 'Indemnity and liability' });
+  });
+
+  it('does not mistake body text or sub-items for headings', () => {
+    expect(detectClauseHeading('30 days notice is required before vacating.')).toBeNull();
+    expect(detectClauseHeading('(a) the Tenant shall pay rent monthly;')).toBeNull();
+    expect(detectClauseHeading('(ii) utilities are borne by the Tenant.')).toBeNull();
+    expect(detectClauseHeading('The Lessee shall maintain the premises.')).toBeNull();
+    expect(detectClauseHeading('OK')).toBeNull();
+  });
+
+  it('splits a numbered sentence into a short title and its clause body', () => {
+    const heading = detectClauseHeading('3. Security Deposit. The Landlord may forfeit the entire deposit on early exit.');
+    expect(heading).toMatchObject({ number: 'Clause 3', title: 'Security Deposit' });
+    expect(heading?.inlineText).toBe('The Landlord may forfeit the entire deposit on early exit.');
+  });
+
+  it('keeps nested sub-items inside their parent clause and numbers the preamble separately', () => {
+    const doc = parseCustomContract(`RENTAL AGREEMENT
+This agreement is made between the Landlord and the Tenant.
+
+1. Rent
+(a) Rent of Rs 30,000 is payable on the 5th of each month;
+(b) 30 days notice is required for any revision.
+
+2. Security Deposit. The Landlord may forfeit the entire deposit without proof of damage.
+
+ARTICLE III - GOVERNING LAW
+This agreement is governed by the laws of India.`, 'Flat Lease');
+
+    expect(doc.clauses.map((c) => c.clauseNumber)).toEqual(['Part 1', 'Clause 1', 'Clause 2', 'Article III']);
+    expect(doc.clauses[0].title).toBe('Rental agreement');
+    const rent = doc.clauses[1];
+    expect(rent.title).toBe('Rent');
+    expect(rent.originalText).toContain('(a) Rent of Rs 30,000');
+    expect(rent.originalText).toContain('(b) 30 days notice');
+    expect(doc.clauses[2].riskLevel).toBe('high');
+  });
+
+  it('gives every clause a unique number so AI insights map back unambiguously', () => {
+    const lines = ['Section 1. Term', 'One year.', 'Section 1. Renewal', 'Automatic renewal applies.'];
+    const doc = parseCustomContract(lines.join(String.fromCharCode(10)), 'Duplicate numbering');
+    const numbers = doc.clauses.map((c) => c.clauseNumber);
+    expect(new Set(numbers).size).toBe(numbers.length);
   });
 });
 

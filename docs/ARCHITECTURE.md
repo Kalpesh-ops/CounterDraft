@@ -76,6 +76,7 @@ legal-pw-f/
 ├── api/
 │   └── genai.ts             # Vercel Function: POST /api/genai (Gemini gateway)
 ├── server/
+│   ├── rateLimit.ts         # Global Redis rate limiter with in-memory fallback
 │   ├── genai.ts             # Validation, prompts, Gemini call, output verification
 │   └── genai.test.ts        # Gateway tests (Gemini mocked)
 ├── public/                  # Static assets & SEO discovery standards
@@ -88,6 +89,7 @@ legal-pw-f/
 │   ├── security.txt         # RFC 9116 security disclosure
 │   └── sitemap.xml          # Search engine sitemap protocol
 ├── src/
+│   ├── hooks/               # useCopyFeedback (clipboard feedback)
 │   ├── components/          # UI modules adhering to 30 negative constraints
 │   │   ├── ActionChecklist.tsx       # Pre-signing & exit milestone tracker
 │   │   ├── ContractComparator.tsx    # Side-by-side diffing engine
@@ -165,7 +167,7 @@ CounterDraft utilizes localized, reactive React state (`useState`) without exter
 ## 5. GenAI Request Lifecycle
 
 1. The browser sends `{ task, ...payload }` to same-origin `POST /api/genai` (60 s client timeout, abortable).
-2. `server/genai.ts` rejects cross-site requests, applies the per-client rate limit, enforces JSON and size limits, and validates the payload against task-specific schemas.
+2. `server/genai.ts` rejects cross-site requests, applies the per-client rate limit (`server/rateLimit.ts`: global via Upstash Redis REST when configured, per-instance memory otherwise), enforces JSON and size limits, and validates the payload against task-specific schemas.
 3. A task prompt is built with the curated precedent corpus in the system instruction and all user text fenced as untrusted data.
 4. Gemini `generateContent` is called in JSON mode (temperature 0.2, one 45 s deadline). A transient 500/502/503/504 is retried once after 600 ms; client errors and 429s are not retried.
 5. Output is normalised: clause numbers must exist in the request, enums are clamped, strings length-capped, quotes verified verbatim, precedents matched to the corpus.

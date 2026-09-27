@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import type { LegalDocument, RiskLevel } from '../types/legal';
-import { safeCopyToClipboard } from '../utils/security';
+import { useCopyFeedback, COPY_FAILED_LABEL } from '../hooks/useCopyFeedback';
 import { FilterIcon, ShieldAlertIcon, DocumentIcon } from './Icons';
 import { AnalysisSourceBadge } from './AnalysisSourceBadge';
 import { ClauseExplainer } from './ClauseExplainer';
@@ -21,7 +21,7 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
   const [selectedRiskFilter, setSelectedRiskFilter] = useState<RiskLevel | 'all'>('all');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
   const [expandedClauseId, setExpandedClauseId] = useState<string | null>(document.clauses[1]?.id || document.clauses[0]?.id || null);
-  const [copiedClauseId, setCopiedClauseId] = useState<string | null>(null);
+  const { copy, statusFor } = useCopyFeedback();
 
   const filteredClauses = useMemo(() => document.clauses.filter((clause) => {
     if (selectedRiskFilter !== 'all' && clause.riskLevel !== selectedRiskFilter) {
@@ -37,16 +37,6 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
     setExpandedClauseId((current) => (current === clauseId ? null : clauseId));
   };
 
-  const handleCopyRedline = (clauseId: string, text: string) => {
-    safeCopyToClipboard(text).then((success) => {
-      if (success) {
-        setCopiedClauseId(clauseId);
-        setTimeout(() => {
-          setCopiedClauseId(null);
-        }, 2000);
-      }
-    });
-  };
 
   return (
     <div className="auditor-container">
@@ -312,10 +302,10 @@ export const DocumentAuditor: React.FC<DocumentAuditorProps> = ({
                             <span className="counter-title">RECOMMENDED COUNTER-PROPOSAL:</span>
                             <button
                               type="button"
-                              onClick={() => handleCopyRedline(clause.id, clause.recommendedCounterProposal)}
+                              onClick={() => void copy(clause.recommendedCounterProposal, clause.id)}
                               className="copy-redline-btn"
                             >
-                              {copiedClauseId === clause.id ? 'Copied to Clipboard' : 'Copy Proposed Redline'}
+                              {statusFor(clause.id) === 'copied' ? 'Copied to Clipboard' : statusFor(clause.id) === 'failed' ? COPY_FAILED_LABEL : 'Copy Proposed Redline'}
                             </button>
                           </div>
                           <div className="counter-proposal-text">

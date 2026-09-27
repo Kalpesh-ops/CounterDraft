@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import type { LegalDocument } from '../types/legal';
 import { generateCounselBrief } from '../services/legalEngine';
-import { sanitizeInput, safeCopyToClipboard } from '../utils/security';
+import { sanitizeInput } from '../utils/security';
+import { useCopyFeedback, COPY_FAILED_LABEL } from '../hooks/useCopyFeedback';
 import { BriefcaseIcon, DownloadIcon, CheckIcon, ShieldAlertIcon } from './Icons';
 
 interface CounselBriefGeneratorProps {
@@ -10,7 +11,8 @@ interface CounselBriefGeneratorProps {
 
 export const CounselBriefGenerator: React.FC<CounselBriefGeneratorProps> = ({ document }) => {
   const [clientName, setClientName] = useState<string>('Client Signatory');
-  const [isCopied, setIsCopied] = useState<boolean>(false);
+  const { copy, statusFor } = useCopyFeedback();
+  const copyStatus = statusFor();
 
   const cleanClientName = sanitizeInput(clientName) || 'Client Signatory';
   const brief = useMemo(() => generateCounselBrief(document, cleanClientName), [document, cleanClientName]);
@@ -53,12 +55,7 @@ export const CounselBriefGenerator: React.FC<CounselBriefGeneratorProps> = ({ do
       text += '  - ' + nc + '\n';
     });
 
-    safeCopyToClipboard(text).then((success) => {
-      if (success) {
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
-      }
-    });
+    void copy(text);
   };
 
   return (
@@ -77,8 +74,8 @@ export const CounselBriefGenerator: React.FC<CounselBriefGeneratorProps> = ({ do
               onClick={handleCopyText}
               className="action-btn-secondary"
             >
-              {isCopied ? <CheckIcon size={14} /> : <BriefcaseIcon size={14} />}
-              <span>{isCopied ? 'Brief Copied to Clipboard' : 'Copy Plaintext Brief'}</span>
+              {copyStatus === 'copied' ? <CheckIcon size={14} /> : <BriefcaseIcon size={14} />}
+              <span aria-live="polite">{copyStatus === 'copied' ? 'Brief Copied to Clipboard' : copyStatus === 'failed' ? COPY_FAILED_LABEL : 'Copy Plaintext Brief'}</span>
             </button>
 
             <button

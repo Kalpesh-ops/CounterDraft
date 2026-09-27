@@ -41,7 +41,7 @@ The former inline frame-busting script was removed so the CSP can use `script-sr
 - **Input limits**: JSON-only, 150 KB body cap, max 60 clauses / 60,000 characters, control-character stripping, task and language allow-lists.
 - **Prompt injection**: user text is wrapped in `<contract>` / `<question>` delimiters, closing tags inside user text are neutralised, and the system instruction treats delimited text as untrusted data.
 - **Output verification**: quotes must appear verbatim in the cited clause; precedents must match the curated corpus; enums and clause numbers are clamped to known values; strings are length-capped. React renders all output as escaped text.
-- **Abuse & errors**: cross-site browser requests rejected (`Sec-Fetch-Site` / `Origin` check), per-client rate limit keyed on the platform-set client IP (20 requests/minute per instance, bounded memory), 45 s upstream deadline covering one retry of transient 5xx errors (never 4xx), generic error messages without upstream details, `Cache-Control: no-store`.
+- **Abuse & errors**: cross-site browser requests rejected (`Sec-Fetch-Site` / `Origin` check), per-client rate limit of 20 requests/minute keyed on the platform-set client IP, enforced globally through Upstash Redis when configured (IP addresses are SHA-256 hashed before storage; one pipelined `INCR` + `PEXPIRE` per request; 1 s timeout) and falling back to a bounded per-instance limiter if Redis is absent or unreachable, with `Retry-After` on 429 responses, 45 s upstream deadline covering one retry of transient 5xx errors (never 4xx), generic error messages without upstream details, `Cache-Control: no-store`.
 
 ### 2.4 Cryptographic Headers & Content Security Policy
 Enforced as response headers in `vercel.json` (with a `<meta>` fallback in `index.html`). No inline scripts or styles are permitted:
@@ -66,9 +66,8 @@ Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()
 
 ### 2.5 Resilient Clipboard Operations (`safeCopyToClipboard`)
 Direct invocation of `navigator.clipboard.writeText()` throws unhandled promise rejections in non-HTTPS origins or when browser permissions are denied.
-- `safeCopyToClipboard()` wraps the Async Clipboard API in a `try/catch`.
-- Automatically falls back to an off-screen readonly `textarea` executed via `document.execCommand('copy')`.
-- Returns a clean boolean promise without console errors.
+- `safeCopyToClipboard()` uses only the asynchronous Clipboard API inside `try/catch` and resolves `false` when it is unavailable or denied; the deprecated `document.execCommand('copy')` path was removed.
+- The shared `useCopyFeedback` hook (`src/hooks/useCopyFeedback.ts`) turns that result into button feedback: a confirmation on success, or an instruction to select the text and press Ctrl+C when the browser blocks access. Its reset timer is cleared on unmount.
 
 ### 2.6 Fault Isolation (`src/components/ErrorBoundary.tsx`)
 - Wraps root component tree in `main.tsx`.

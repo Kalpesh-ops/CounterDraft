@@ -68,6 +68,15 @@ describe('DocumentAuditor', () => {
   });
 });
 
+describe('Copy feedback', () => {
+  it('tells the user to copy manually when the browser blocks clipboard access', async () => {
+    writeText.mockRejectedValueOnce(new DOMException('denied', 'NotAllowedError'));
+    render(<NegotiationPlaybook document={leaseDoc} />);
+    fireEvent.click(screen.getByRole('button', { name: /Copy Negotiation Email/ }));
+    expect(await screen.findByText(/Copy blocked: select the text and press Ctrl\+C/)).toBeDefined();
+  });
+});
+
 describe('ContractComparator', () => {
   it('filters diffs by impact', () => {
     render(<ContractComparator />);

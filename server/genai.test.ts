@@ -6,7 +6,6 @@ import {
   handleGenAIRequest,
   clientIdentifier,
   isCrossSiteRequest,
-  isRateLimited,
   matchPrecedent,
   normalizeAnalyze,
   normalizeQA,
@@ -212,11 +211,14 @@ describe('GenAI gateway - HTTP handler', () => {
     expect(clientIdentifier(new Headers({ 'x-forwarded-for': '2.2.2.2, 3.3.3.3' }))).toBe('2.2.2.2');
   });
 
-  it('rate-limits a single client after the per-minute budget', () => {
-    const key = 'rate-test-client';
-    const results = Array.from({ length: 21 }, () => isRateLimited(key, 1_000));
-    expect(results.slice(0, 20).every((limited) => !limited)).toBe(true);
-    expect(results[20]).toBe(true);
-    expect(isRateLimited(key, 1_000 + 61_000)).toBe(false);
+  it('answers 429 with Retry-After once the client exhausts its budget', async () => {
+    const fetchImpl = geminiReply({ answerSummary: 'ok', statutoryRightsNote: '', citations: [], precedentRefs: [], suggestedFollowUps: [] });
+    const headers = { 'x-vercel-forwarded-for': '203.0.113.77' };
+    for (let i = 0; i < 20; i++) {
+      expect((await handleGenAIRequest(post(qaRequest, headers), env, fetchImpl)).status).toBe(200);
+    }
+    const limited = await handleGenAIRequest(post(qaRequest, headers), env, fetchImpl);
+    expect(limited.status).toBe(429);
+    expect(limited.headers.get('retry-after')).toBe('60');
   });
 });

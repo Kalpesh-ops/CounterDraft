@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   sanitizeInput,
   sanitizeLegalText,
@@ -105,9 +105,31 @@ Clause 2. Immediate Termination Without Notice`;
 });
 
 describe('Security & Sanitization Suite - Safe Clipboard Operations', () => {
-  it('safeCopyToClipboard executes without throwing unhandled exceptions', async () => {
+  const setClipboard = (value: unknown) =>
+    Object.defineProperty(window.navigator, 'clipboard', { value, configurable: true });
+
+  afterEach(() => setClipboard(undefined));
+
+  it('copies through the async Clipboard API', async () => {
+    const writeText = vi.fn<(text: string) => Promise<void>>(async () => {});
+    setClipboard({ writeText });
     const { safeCopyToClipboard } = await import('./security');
-    const result = await safeCopyToClipboard('Legal brief sample text');
-    expect(typeof result).toBe('boolean');
+    await expect(safeCopyToClipboard('Legal brief sample text')).resolves.toBe(true);
+    expect(writeText).toHaveBeenCalledWith('Legal brief sample text');
+  });
+
+  it('resolves false instead of throwing when permission is denied', async () => {
+    setClipboard({ writeText: vi.fn(async () => { throw new DOMException('denied', 'NotAllowedError'); }) });
+    const { safeCopyToClipboard } = await import('./security');
+    await expect(safeCopyToClipboard('text')).resolves.toBe(false);
+  });
+
+  it('resolves false when the Clipboard API is unavailable, without deprecated fallbacks', async () => {
+    setClipboard(undefined);
+    const execCommand = vi.fn();
+    Object.defineProperty(document, 'execCommand', { value: execCommand, configurable: true });
+    const { safeCopyToClipboard } = await import('./security');
+    await expect(safeCopyToClipboard('text')).resolves.toBe(false);
+    expect(execCommand).not.toHaveBeenCalled();
   });
 });

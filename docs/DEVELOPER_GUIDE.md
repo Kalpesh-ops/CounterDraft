@@ -31,7 +31,7 @@ The application will be served at `http://localhost:5173/`.
 
 ## 2. Testing & Quality Assurance
 
-CounterDraft uses **Vitest** with **Testing Library** (84 tests) and enforces coverage thresholds in CI (statements 85%, lines 85%, functions 80%, branches 70%; current: ~88% statements, ~91% lines):
+CounterDraft uses **Vitest** with **Testing Library** (103 tests) and enforces coverage thresholds in CI (statements 85%, lines 85%, functions 80%, branches 70%; current: ~88% statements, ~91% lines):
 
 ```bash
 npm test                 # full suite, single run
@@ -45,7 +45,8 @@ npm run audit:deps       # npm audit at moderate severity (also run in CI)
 - `src/utils/security.test.ts`: XSS neutralisation, payload caps, control-character removal, ReDoS resilience, clipboard fallbacks.
 - `src/services/legalEngine.test.ts`: statutory clause risk evaluation, contract parsing, grounded Q&A retrieval, financial exposure maths.
 - `src/services/genai.test.ts`: merging Gemini insights without altering verbatim clause text, gateway error handling for fallback.
-- `server/genai.test.ts`: request validation, prompt-injection fencing, verbatim-quote and precedent verification, cross-site blocking, trusted client IP, rate limiting, and HTTP status mapping (Gemini mocked).
+- `server/genai.test.ts`: request validation, prompt-injection fencing, verbatim-quote and precedent verification, cross-site blocking, trusted client IP, transient-error retries, 429 `Retry-After`, and HTTP status mapping (Gemini mocked).
+- `server/rateLimit.test.ts`: global Redis budget across instances, window rollover, authenticated pipeline with hashed IPs, fallback to memory when Redis is down or unconfigured.
 - `api/genai.test.ts`: the Vercel Function adapter and its configuration.
 - `src/components/GenAIFeatures.test.tsx`: accessible dialogs (focus trap, Escape, focus restore), Gemini upload/Q&A/Explain Simply flows, failure fallbacks, GenAI opt-out, response caching.
 - `src/components/Workspaces.test.tsx`: auditor filters and keyboard expansion, comparator custom diffs and errors, checklist progress/add/export, counsel brief copy/print, negotiation email, precedent search, file-upload guards, error boundary recovery.
@@ -122,5 +123,5 @@ CounterDraft's visual identity reflects a classical, authoritative legal publish
    - Avoid nested repeating regular expressions.
    - Use linear `string.includes()` or non-overlapping tokenizers.
 3. **Graceful Error Handling**:
-   - Wrap asynchronous APIs (like `navigator.clipboard.writeText`) in try/catch or use `safeCopyToClipboard()`.
+   - Copy to the clipboard through the `useCopyFeedback()` hook (built on `safeCopyToClipboard()`), which reports failures to the user instead of failing silently.
    - Never allow unhandled promise rejections.

@@ -129,35 +129,18 @@ export function validateContractPayload(rawText: string, title?: string): {
 }
 
 /**
- * Safely copies text to the system clipboard with automatic fallback
- * and graceful rejection handling (no unhandled promises).
+ * Copies text with the asynchronous Clipboard API and never throws.
+ *
+ * Resolves `false` when the API is unavailable (insecure origin, very old browser) or the
+ * user denies permission, so callers can tell the user to copy manually. The deprecated
+ * `document.execCommand('copy')` fallback is intentionally not used.
  */
 export async function safeCopyToClipboard(text: string): Promise<boolean> {
-  if (typeof window === 'undefined') return false;
-
-  // 1. Try modern Async Clipboard API
-  if (window.navigator?.clipboard && typeof window.navigator.clipboard.writeText === 'function') {
-    try {
-      await window.navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      // Permission denied or non-secure origin - proceed to fallback
-    }
-  }
-
-  // 2. Fallback to hidden textarea execCommand
+  const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+  if (!clipboard || typeof clipboard.writeText !== 'function') return false;
   try {
-    const textarea = window.document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.left = '-9999px';
-    textarea.style.top = '-9999px';
-    textarea.setAttribute('readonly', '');
-    window.document.body.appendChild(textarea);
-    textarea.select();
-    const success = window.document.execCommand('copy');
-    window.document.body.removeChild(textarea);
-    return success;
+    await clipboard.writeText(text);
+    return true;
   } catch {
     return false;
   }

@@ -42,7 +42,7 @@ Please **do not** file public GitHub issues for sensitive security vulnerabiliti
 
 - **Zero Cloud Persistence**: CounterDraft never stores user contract text, questions, or outputs. Text is sent to Google Gemini via `/api/genai` only when GenAI features are used, and users can opt out at upload.
 - **Server-Held API Key**: `GEMINI_API_KEY` is read only by the Vercel Function and sent to Google in the `x-goog-api-key` header; it is never bundled into client code or placed in URLs.
-- **GenAI Guardrails**: Request schema and size validation, per-client rate limiting, prompt-injection fencing, verbatim-quote and curated-precedent verification of model output, and generic error messages that never leak upstream details.
+- **GenAI Guardrails**: Request schema and size validation, a global per-client rate limit (Upstash Redis with an in-memory fallback, hashed IPs), prompt-injection fencing, verbatim-quote and curated-precedent verification of model output, and generic error messages that never leak upstream details.
 - **Strict Content Security Policy**: Network egress is restricted via `connect-src 'self'`.
 - **Zero DOM Sinks**: `dangerouslySetInnerHTML`, `innerHTML`, and `document.write` are strictly prohibited.
 - **Anti-Clickjacking**: Enforced via `X-Frame-Options: DENY` and CSP `frame-ancestors 'none'` response headers (`vercel.json`), which allows a strict `script-src 'self'` with no inline scripts.

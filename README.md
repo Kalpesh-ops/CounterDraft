@@ -5,7 +5,7 @@
 [![CI/CD Pipeline](https://github.com/Kalpesh-ops/CounterDraft/actions/workflows/ci.yml/badge.svg)](https://github.com/Kalpesh-ops/CounterDraft/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![GenAI: Google Gemini](https://img.shields.io/badge/GenAI-Google_Gemini-1a73e8.svg)](#2-approach-grounded-genai)
-[![Tests Passing](https://img.shields.io/badge/Tests-84%20passing-brightgreen.svg)](#testing)
+[![Tests Passing](https://img.shields.io/badge/Tests-103%20passing-brightgreen.svg)](#testing)
 
 ---
 
@@ -72,7 +72,8 @@ Pure LLM legal tools hallucinate citations and can be steered by text hidden ins
           |  GenAI on (default, with consent) |  GenAI off / unavailable
           v                                   v
 [ POST /api/genai  (Vercel Function) ]   [ Offline statutory rule engine ]
-  - schema & size validation, rate limit   - ICA 1872 / TPA 1882 heuristics
+  - schema & size validation, global rate  - ICA 1872 / TPA 1882 heuristics
+    limit (Upstash Redis, memory fallback)
   - injection-fenced prompt -> Google Gemini
   - verify quotes & precedents, clamp enums
           |                                   |
@@ -182,11 +183,12 @@ npm run build
 
 1. Import the repository in Vercel (framework preset: Vite).
 2. Add the environment variable `GEMINI_API_KEY` (and optionally `GEMINI_MODEL`) under **Settings > Environment Variables**.
-3. Deploy. The static app and the `/api/genai` function deploy together; the key never reaches the browser.
+3. Optional but recommended: add **Upstash Redis** from the Vercel Marketplace (Storage tab). It injects `KV_REST_API_URL` and `KV_REST_API_TOKEN`, which switch the rate limiter from per-instance memory to one global limit across all serverless instances.
+4. Deploy. The static app and the `/api/genai` function deploy together; the key never reaches the browser.
 
 ### Testing
 
-`npm test` runs 84 Vitest tests (`npm run test:coverage` enforces thresholds; ~91% line coverage) covering the statutory engine, input sanitisation, the GenAI gateway (validation, prompt-injection fencing, quote and precedent verification, cross-site request blocking, HTTP handling, and rate limiting, with Gemini mocked), the GenAI client merge and fallback logic, accessible dialogs (focus trap, Escape, focus restore), the Gemini upload, Q&A and Explain Simply flows including failure fallbacks and opt-out, every workspace (auditor, comparator, checklist, counsel brief, negotiation email, precedents), file-upload guards, the error boundary, and UI navigation. CI also runs `npm audit`, Oxlint (with jsx-a11y rules), and a strict typecheck.
+`npm test` runs 103 Vitest tests (`npm run test:coverage` enforces thresholds; ~91% line coverage) covering the statutory engine, input sanitisation, the GenAI gateway (validation, prompt-injection fencing, quote and precedent verification, cross-site request blocking, retries, and HTTP handling, with Gemini mocked), the distributed Redis rate limiter and its in-memory fallback, clause segmentation edge cases, the GenAI client merge and fallback logic, accessible dialogs (focus trap, Escape, focus restore), the Gemini upload, Q&A and Explain Simply flows including failure fallbacks and opt-out, every workspace (auditor, comparator, checklist, counsel brief, negotiation email, precedents), file-upload guards, the error boundary, and UI navigation. CI also runs `npm audit`, Oxlint (with jsx-a11y rules), and a strict typecheck.
 
 ---
 

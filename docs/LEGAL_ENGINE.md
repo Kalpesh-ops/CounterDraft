@@ -6,7 +6,15 @@
 
 ## 1. Overview of the Legal Engine
 
-The `legalEngine.ts` service implements deterministic, rule-based statutory analysis grounded in the substantive laws of India. Unlike opaque, non-deterministic LLM prompts that risk hallucinating citations or falling prey to adversarial instruction injection, CounterDraft's core reasoning engine pairs codified legal doctrines with binding Supreme Court precedents to generate consistent, legally sound evaluations.
+The `legalEngine.ts` service implements deterministic, rule-based statutory analysis grounded in the substantive laws of India. It does two jobs: it segments every contract into verbatim clauses (the grounding that Google Gemini's explanations are layered on and verified against), and it is the offline fallback that rates clauses when GenAI is switched off or unavailable. Pairing codified legal doctrines with binding Supreme Court precedents keeps its evaluations consistent and free of hallucinated citations.
+
+### 1.1 Clause Segmentation (`detectClauseHeading`, `parseCustomContract`)
+A line starts a new clause when it is one of:
+- a keyword heading: `Section 4.1`, `Clause 3`, `Article IV` (Roman numerals supported), `Paragraph 2`, or `§ 7`;
+- a numbered heading: `1.`, `2)`, or `1.1 Title` (a number followed by a capitalised word);
+- a markdown heading (`## Dispute Resolution`) or a short ALL-CAPS heading (`INDEMNITY AND LIABILITY`).
+
+Sub-items such as `(a)`, `(ii)` or `a)` never start a clause, so nested lists stay inside their parent, and numbers followed by lowercase text (`30 days notice...`) are body text. "Title. Body" lines are split at the first full stop. Text before the first heading becomes the `Preamble`; unnumbered headings are labelled `Part 1`, `Part 2`, and so on; duplicate designators get a suffix (`Section 1 (2)`) so every clause number is unique and Gemini insights map back unambiguously. Unstructured text falls back to paragraph chunking. All patterns are anchored with no nested quantifiers, so matching is linear (ReDoS-safe).
 
 ---
 
@@ -43,6 +51,7 @@ The `legalEngine.ts` service implements deterministic, rule-based statutory anal
 - **Judicial Doctrine**: Lessors are statutorily bound to provide uninterrupted possession. Landlords who fail to maintain the structural integrity of the leased premises cannot shift total repair burdens onto tenants without contractual consideration.
 - **Engine Action**:
   - Differentiates between ordinary interior wear-and-tear (tenant's minor responsibility) and major external/structural defects (landlord's mandatory duty).
+  - Flags landlord right-of-entry clauses as **Caution** when entry is allowed "at any time", "without notice", on verbal notice, or with under 24 hours' notice, and proposes a 24-hour written-notice redline.
 
 ---
 

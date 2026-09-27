@@ -8,6 +8,7 @@
  */
 import { courtPrecedents } from '../src/data/courtPrecedents.js';
 import { SUPPORTED_LANGUAGES } from '../src/types/genai.js';
+import { checkRateLimit, RATE_WINDOW_MS, type RateLimitEnv } from './rateLimit.js';
 import type {
   AIClauseInsight, AIObligation, AnalyzeResult, ClauseInput, QAResult, SimplifyResult, SupportedLanguage,
 } from '../src/types/genai.js';
@@ -423,31 +424,6 @@ export async function runTask(req: GenAIRequest, opts: GeminiOptions): Promise<A
 // HTTP handler (framework-agnostic Web Request/Response)
 // ---------------------------------------------------------------------------
 
-const RATE_WINDOW_MS = 60_000;
-const RATE_MAX = 20;
-const RATE_MAX_TRACKED = 5_000;
-const rateBuckets = new Map<string, { count: number; resetAt: number }>();
-
-/** Drops expired buckets so memory stays bounded without resetting active clients' limits. */
-function pruneRateBuckets(now: number): void {
-  for (const [key, bucket] of rateBuckets) {
-    if (bucket.resetAt <= now) rateBuckets.delete(key);
-  }
-}
-
-/** Best-effort per-instance fixed-window limiter; serverless instances do not share memory. */
-export function isRateLimited(key: string, now = Date.now()): boolean {
-  const bucket = rateBuckets.get(key);
-  if (!bucket || bucket.resetAt <= now) {
-    if (rateBuckets.size >= RATE_MAX_TRACKED) pruneRateBuckets(now);
-    if (rateBuckets.size >= RATE_MAX_TRACKED) return true; // Fail closed under a flood of distinct clients.
-    rateBuckets.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return false;
-  }
-  bucket.count += 1;
-  return bucket.count > RATE_MAX;
-}
-
 /**
  * Identifies the client for rate limiting. Prefers the platform-set header, which
  * Vercel overwrites and clients cannot spoof, over the client-controllable X-Forwarded-For.
@@ -473,13 +449,18 @@ export function isCrossSiteRequest(request: Request): boolean {
   }
 }
 
-const json = (body: unknown, status = 200) =>
+const json = (body: unknown, status = 200, extraHeaders: Record<string, string> = {}) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' },
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': 'no-store',
+      'x-content-type-options': 'nosniff',
+      ...extraHeaders,
+    },
   });
 
-export interface HandlerEnv {
+export interface HandlerEnv extends RateLimitEnv {
   GEMINI_API_KEY?: string;
   GEMINI_MODEL?: string;
 }
@@ -492,7 +473,10 @@ export async function handleGenAIRequest(request: Request, env: HandlerEnv, fetc
   if (isCrossSiteRequest(request)) return json({ error: 'Cross-site requests are not allowed.' }, 403);
   if (!env.GEMINI_API_KEY) return json({ error: 'AI service is not configured.' }, 503);
 
-  if (isRateLimited(clientIdentifier(request.headers))) return json({ error: 'Too many AI requests. Please wait a minute.' }, 429);
+  const rate = await checkRateLimit(clientIdentifier(request.headers), env, fetchImpl);
+  if (rate.limited) {
+    return json({ error: 'Too many AI requests. Please wait a minute.' }, 429, { 'retry-after': String(RATE_WINDOW_MS / 1000) });
+  }
 
   // Reject oversized payloads from the declared length before buffering anything into memory.
   const declaredLength = Number(request.headers.get('content-length') ?? '0');

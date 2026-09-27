@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config'
 
 /**
  * Serves POST /api/genai during `vite dev` by forwarding to the same handler
- * the Vercel Function uses. Reads GEMINI_API_KEY from .env.local.
+ * the Vercel Function uses. Reads GEMINI_* and optional Redis (UPSTASH_* / KV_*) settings from .env.local.
  */
 function genaiDevApi(env: Record<string, string>): Plugin {
   return {
@@ -31,7 +31,7 @@ function genaiDevApi(env: Record<string, string>): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), genaiDevApi(loadEnv(mode, process.cwd(), 'GEMINI_'))],
+  plugins: [react(), genaiDevApi(loadEnv(mode, process.cwd(), ['GEMINI_', 'UPSTASH_', 'KV_']))],
   build: {
     rollupOptions: {
       output: {

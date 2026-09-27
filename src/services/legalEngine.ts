@@ -29,8 +29,11 @@ export function analyzeClauseRisk(text: string, title: string): {
   const lower = text.toLowerCase();
   const lowerTitle = title.toLowerCase();
 
-  // Non-compete and restraint of trade
-  if (lower.includes('non-compete') || lower.includes('restraint') || (lower.includes('competition') && lower.includes('month')) || lowerTitle.includes('competition')) {
+  // Non-compete and restraint of trade (explicit wording, a "compete" heading, or a post-exit ban on business or work)
+  const restrictsFutureWork = lower.includes('shall not') && /\b(business|employment|work|services)\b/.test(lower)
+    && /\b(after|following|post)\b/.test(lower) && /\b(months?|years?)\b/.test(lower);
+  if (lower.includes('non-compete') || lower.includes('restraint') || (lower.includes('competition') && lower.includes('month'))
+    || lowerTitle.includes('compet') || restrictsFutureWork) {
     return {
       riskLevel: 'high',
       riskRationale: 'Restricts post-tenure commercial activities and livelihood. Under Section 27 of the Indian Contract Act, post-termination non-competes are void ab initio.',
@@ -54,6 +57,25 @@ export function analyzeClauseRisk(text: string, title: string): {
       recommendedCounterProposal: 'Require that deposit deductions be restricted to verified unpaid utility dues and substantiated physical damages beyond ordinary wear and tear, returnable within 14 days.',
       category: 'financial',
       tags: ['security deposit', 'forfeiture', 'penalty', 'damages']
+    };
+  }
+
+  // Right of entry / inspection with short or no notice (tenant's quiet enjoyment)
+  if (/\b(enter|entry|inspect|inspection)\b/.test(lower + ' ' + lowerTitle) && /\b(premises|flat|apartment|house|dwelling|landlord|lessor)\b/.test(lower)) {
+    const noticeHours = Number(lower.match(/(\d{1,3})\s*hours?/)?.[1] ?? NaN);
+    const shortNotice = lower.includes('any time') || lower.includes('without notice') || lower.includes('verbal') || noticeHours < 24;
+    return {
+      riskLevel: shortNotice ? 'caution' : 'standard',
+      riskRationale: shortNotice
+        ? 'Permits the landlord to enter on very short, informal, or no notice, which erodes your statutory right to quiet enjoyment of the premises.'
+        : 'Regulates landlord access to the premises with advance notice, consistent with ordinary tenancy practice.',
+      statutoryContext: 'Section 108(c), Transfer of Property Act, 1882 (covenant for quiet enjoyment); state rent control and Model Tenancy Act norms of 24 hours written notice.',
+      plainSummary: shortNotice
+        ? 'The landlord can walk into your home with little or no warning.'
+        : 'The landlord may visit the property after giving you advance notice.',
+      recommendedCounterProposal: 'Landlord may enter only between 8 AM and 8 PM after at least 24 hours written notice stating the purpose, except in a genuine emergency threatening life or property.',
+      category: 'covenants',
+      tags: ['right of entry', 'quiet enjoyment', 'notice period', 'section 108']
     };
   }
 
@@ -175,6 +197,74 @@ export function analyzeClauseRisk(text: string, title: string): {
   };
 }
 
+/** A clause boundary recognised by {@link detectClauseHeading}. */
+export interface ClauseHeading {
+  /** Normalised designator, e.g. "Section 4.1", "Article IV", "Clause 3"; null when the heading carries no number. */
+  number: string | null;
+  title: string;
+  /** Text that followed the designator on the same line when it reads as clause body rather than a title. */
+  inlineText: string;
+}
+
+// All patterns are anchored and free of nested or overlapping quantifiers, so matching stays linear (ReDoS-safe).
+const KEYWORD_HEADING = /^(section|clause|article|paragraph|\u00A7)\s*(\d+(?:\.\d+)*|[ivxlc]+)\b[\s.:)\u2013\u2014-]*(.*)$/i;
+const NUMBERED_HEADING = /^(\d{1,3}(?:\.\d{1,3}){0,3})(?:[.)]\s+|\s+(?=[A-Z]))(.+)$/;
+const MARKDOWN_HEADING = /^#{1,6}\s+(.+)$/;
+const ALL_CAPS_HEADING = /^[A-Z][A-Z0-9 &,'()/-]{3,79}$/;
+const TITLE_MAX_CHARS = 80;
+
+const KEYWORD_LABELS: Record<string, string> = {
+  section: 'Section', clause: 'Clause', article: 'Article', paragraph: 'Paragraph', '\u00a7': 'Section',
+};
+
+/** Splits "Title text. Body text" style remainders into a short title and the clause body. */
+function splitTitleAndBody(rest: string): { title: string; inlineText: string } {
+  const trimmed = rest.trim();
+  // A short remainder without sentence punctuation is a title ("Security Deposit").
+  if (trimmed.length <= TITLE_MAX_CHARS && !/[.;]$/.test(trimmed)) return { title: trimmed, inlineText: '' };
+  // "Security Deposit. The Tenant shall..." -> title before the first full stop.
+  const stop = trimmed.indexOf('. ');
+  if (stop > 0 && stop <= TITLE_MAX_CHARS) return { title: trimmed.slice(0, stop), inlineText: trimmed.slice(stop + 2) };
+  // Otherwise the whole line is body text; derive a readable title from its first words.
+  const words = trimmed.split(/\s+/).slice(0, 6).join(' ');
+  return { title: words.replace(/[,.;:]+$/, ''), inlineText: trimmed };
+}
+
+/**
+ * Recognises a line that starts a new clause. Supports "Section 4.1", "Clause 3", "Article IV",
+ * "§ 7", numbered lines ("1.", "2)", "1.1 Title"), markdown headings, and ALL-CAPS headings.
+ * Sub-items such as "(a)", "(i)" or "a)" are deliberately not headings, so nested lists stay
+ * inside their parent clause; numbers followed by lowercase text ("30 days notice") are body text.
+ */
+export function detectClauseHeading(line: string): ClauseHeading | null {
+  const markdown = line.match(MARKDOWN_HEADING);
+  if (markdown) {
+    const inner = detectClauseHeading(markdown[1].trim());
+    return inner ?? { number: null, title: markdown[1].replace(/[#*_]+/g, '').trim(), inlineText: '' };
+  }
+
+  const keyword = line.match(KEYWORD_HEADING);
+  if (keyword) {
+    const label = KEYWORD_LABELS[keyword[1].toLowerCase()] ?? 'Section';
+    const designator = /^\d/.test(keyword[2]) ? keyword[2] : keyword[2].toUpperCase();
+    const { title, inlineText } = splitTitleAndBody(keyword[3]);
+    return { number: `${label} ${designator}`, title: title || 'General Terms', inlineText };
+  }
+
+  const numbered = line.match(NUMBERED_HEADING);
+  if (numbered) {
+    const { title, inlineText } = splitTitleAndBody(numbered[2]);
+    return { number: `Clause ${numbered[1]}`, title: title || 'General Terms', inlineText };
+  }
+
+  const letters = line.replace(/[^A-Za-z]/g, '');
+  if (ALL_CAPS_HEADING.test(line) && letters.length >= 4 && letters === letters.toUpperCase()) {
+    return { number: null, title: line.charAt(0) + line.slice(1).toLowerCase(), inlineText: '' };
+  }
+
+  return null;
+}
+
 /**
  * Parses raw legal contract text into a fully indexed LegalDocument object.
  * 
@@ -192,47 +282,39 @@ export function parseCustomContract(rawText: string, customTitle?: string, custo
   const title = customTitle || (lines.length > 0 ? lines[0].slice(0, 80) : 'Custom Legal Document');
   const documentType = customType || 'Custom Contract / Agreement';
 
-  // Chunk text into sections or clauses
+  // Chunk text into clauses at recognised headings; everything before the first heading is the preamble.
   const rawSections: { title: string; number: string; text: string }[] = [];
-  let currentSection = {
-    title: 'Preamble / Recitals',
-    number: 'Clause 1',
-    text: ''
+  const usedNumbers = new Set<string>();
+  const uniqueNumber = (candidate: string): string => {
+    let number = candidate;
+    for (let n = 2; usedNumbers.has(number); n++) number = `${candidate} (${n})`;
+    usedNumbers.add(number);
+    return number;
   };
 
-  const clauseRegex = /^(?:section|clause|article|paragraph|\u00A7)\s*([0-9]+(?:\.[0-9]+)*)[.:\-\s]+(.*)$/i;
-  const numRegex = /^([0-9]+(?:\.[0-9]+)*)[.:\-\s]+(.*)$/;
+  // Unnumbered headings get their own "Part N" sequence so they never collide with explicit clause numbers.
+  let unnumberedHeadings = 0;
+  let currentSection = { title: 'Preamble / Recitals', number: 'Preamble', text: '' };
+  const flush = () => {
+    if (currentSection.text.trim()) {
+      rawSections.push({ ...currentSection, number: uniqueNumber(currentSection.number) });
+    }
+  };
 
   for (const line of lines) {
-    const clauseMatch = line.match(clauseRegex);
-    const numMatch = line.match(numRegex);
-
-    if (clauseMatch) {
-      if (currentSection.text.trim()) {
-        rawSections.push({ ...currentSection });
-      }
+    const heading = detectClauseHeading(line);
+    if (heading) {
+      flush();
       currentSection = {
-        number: 'Section ' + clauseMatch[1],
-        title: clauseMatch[2].trim() || 'General Terms',
-        text: ''
-      };
-    } else if (numMatch && numMatch[1].length <= 5 && line.length < 100) {
-      if (currentSection.text.trim()) {
-        rawSections.push({ ...currentSection });
-      }
-      currentSection = {
-        number: 'Clause ' + numMatch[1],
-        title: numMatch[2].trim() || 'General Terms',
-        text: ''
+        number: heading.number ?? `Part ${++unnumberedHeadings}`,
+        title: heading.title,
+        text: heading.inlineText
       };
     } else {
       currentSection.text += (currentSection.text ? ' ' : '') + line;
     }
   }
-
-  if (currentSection.text.trim()) {
-    rawSections.push(currentSection);
-  }
+  flush();
 
   // If no sections were broken down by regex, split by double newlines or chunks
   if (rawSections.length <= 1 && rawText.length > 300) {
